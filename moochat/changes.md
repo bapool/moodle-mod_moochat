@@ -1,5 +1,44 @@
 # MooChat Plugin - Changes for Moodle.org Submission
 
+## Version 1.2.5 (2025-11-13)
+
+### Bug Fixes
+- Fixed confusion between rate limiting and message limits
+  - Rate limiting now correctly counts **conversations per day/hour** (not individual messages)
+  - Max messages per session now correctly limits **messages per conversation**
+  - Both limits now display separately and clearly:
+    - "Conversations remaining today: X"
+    - "Messages remaining in this conversation: X"
+  - Clearing chat now starts a new conversation (counts toward rate limit)
+  - Continuing an existing conversation does not count toward rate limit
+- Updated language strings for clarity:
+  - Changed "Questions remaining" to "Conversations remaining today"
+  - Added "Messages remaining in this conversation"
+- Fixed message limit error dialog:
+  - Changed title from "Error" to "Chat Limit Reached"
+  - Updated message to be more helpful and instructive
+
+**Status:** ✓ COMPLETE
+
+---
+
+## Version 1.2.4 (2025-11-13)
+
+### Bug Fixes
+- Fixed missing language string 'missingidandcmid' causing validation errors
+- Fixed JavaScript coding standards violations (125 errors corrected)
+  - Removed tab characters, replaced with spaces
+  - Removed unused variables (messageCount, ex parameter)
+  - Fixed @package JSDoc tag formatting
+  - Fixed promise return value warning
+  - Added eslint-disable comment for necessary confirm() usage
+- Rebuilt JavaScript with Grunt - all files now properly minified
+- All AMD build files now meet Moodle.org submission requirements
+
+**Status:** ✓ COMPLETE
+
+---
+
 ## Version: 1.0.1
 Date: 2025-11-08
 

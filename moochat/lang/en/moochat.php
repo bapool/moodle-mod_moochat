@@ -81,7 +81,7 @@ $string['send'] = 'Send';
 $string['clear'] = 'Clear Chat';
 $string['maxmessagesreached'] = 'You have reached the maximum number of messages for this session.';
 $string['thinking'] = 'Thinking...';
-
+$string['missingidandcmid'] = 'Either course module ID or instance ID must be specified';
 // Privacy
 $string['privacy:metadata:moochat_usage'] = 'Information about user interactions with MooChat activities';
 $string['privacy:metadata:moochat_usage:userid'] = 'The ID of the user';

@@ -15,6 +15,6 @@
 defined('MOODLE_INTERNAL') || die();
 $plugin->component = 'mod_moochat';
 $plugin->requires = 2024042200; // Moodle 4.5
-$plugin->version = 2025111302;  // YYYYMMDDXX - Fixed JavaScript string loading issue
+$plugin->version = 2025111303;  // YYYYMMDDXX - Fixed JavaScript string loading issue
 $plugin->maturity = MATURITY_BETA;
 $plugin->release = 'v1.2.6';

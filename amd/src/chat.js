@@ -115,6 +115,22 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                             content: response.reply
                         });
 
+                        // Save conversation to database
+                        Ajax.call([{
+                            methodname: 'mod_moochat_save_conversation',
+                            args: {
+                                moochatid: moochatid,
+                                usermessage: message,
+                                assistantmessage: response.reply
+                            },
+                            done: function() {
+                                // Conversation saved successfully (silent)
+                            },
+                            fail: function() {
+                                // Failed to save (silent - don't interrupt user experience)
+                            }
+                        }]);
+
                         // Update remaining questions
                         if (response.remaining !== undefined) {
                             remainingQuestions = response.remaining;

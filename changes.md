@@ -1,5 +1,51 @@
 # MooChat Plugin - Changes for Moodle.org Submission
 
+## Version 1.3.0 (2026-02-18)
+
+### New Features
+- **Conversation History Tracking** - Teachers can now view complete conversation histories between students and the AI
+  - All student-AI conversations are automatically logged to the database
+  - New `moochat_conversations` table stores individual messages with role (user/assistant)
+  - History page displays conversations organized by date with collapsible sections
+  - "History" button added to activity sidebar (visible to teachers only)
+  - Student list shows total message count and last message timestamp
+  - Conversations are automatically deleted when activities are deleted or courses are reset
+  - Backup/restore includes conversation history when "Include user data" is selected
+  
+### Files Added
+- `classes/external/save_conversation.php` - External web service to save conversations
+- `history.php` - Teacher interface to view student conversation history
+
+### Files Modified
+- `db/install.xml` - Added `moochat_conversations` table definition
+- `db/upgrade.php` - Added upgrade step to create conversations table
+- `db/services.php` - Registered `mod_moochat_save_conversation` web service
+- `db/access.php` - Added `mod/moochat:viewhistory` capability for teachers
+- `lang/en/moochat.php` - Added language strings for history feature
+- `amd/src/chat.js` - Added Ajax call to save conversations after each message
+- `amd/build/chat.min.js` - Rebuilt with conversation saving functionality
+- `view.php` - Added "History" link for teachers in sidebar
+- `lib.php` - Updated delete and reset functions to remove conversation data
+- `styles.css` - Added styling for history page and collapsible conversation display
+- `backup/moodle2/backup_moochat_stepslib.php` - Added conversations to backup
+- `backup/moodle2/restore_moochat_stepslib.php` - Added conversations to restore
+- `version.php` - Bumped to 2026021801 / v1.3.0
+
+### Database Changes
+- New table: `moochat_conversations`
+  - Fields: id, moochatid, userid, role, message, timecreated
+  - Indexes: moochatid-userid, timecreated
+  - Foreign keys: moochatid → moochat.id, userid → user.id
+
+### Privacy Compliance
+- Conversation data is included in user data export
+- Conversations are deleted when users request data deletion
+- History feature respects user privacy - only teachers with appropriate capability can view
+
+**Status:** ✓ COMPLETE
+
+---
+
 ## Version 1.2.5 (2025-11-13)
 
 ### Bug Fixes

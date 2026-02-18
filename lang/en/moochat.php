@@ -23,6 +23,7 @@ $string['modulename_help'] = 'The MooChat activity allows you to create an AI-po
 $string['moochat:addinstance'] = 'Add a new MooChat activity';
 $string['moochat:view'] = 'View MooChat activity';
 $string['moochat:submit'] = 'Submit messages to MooChat';
+$string['moochat:viewhistory'] = 'View student conversation history';
 
 // Settings
 $string['chatname'] = 'Chat Name';
@@ -82,12 +83,35 @@ $string['clear'] = 'Clear Chat';
 $string['maxmessagesreached'] = 'You have reached the maximum number of messages for this session.';
 $string['thinking'] = 'Thinking...';
 $string['missingidandcmid'] = 'Either course module ID or instance ID must be specified';
+
+// History
+$string['history'] = 'History';
+$string['studentconversations'] = 'Student Conversations';
+$string['viewconversations'] = 'View Student Conversations';
+$string['conversationwith'] = 'Conversation with {$a}';
+$string['backtolist'] = 'Back to List';
+$string['noconversations'] = 'No conversation history found.';
+$string['nostudentconversations'] = 'No students have used this MooChat activity yet.';
+$string['messages'] = 'messages';
+$string['messagecount'] = 'Messages';
+$string['lastmessage'] = 'Last Message';
+$string['viewdetails'] = 'View Details';
+$string['expandall'] = 'Expand All';
+$string['collapseall'] = 'Collapse All';
+
 // Privacy
 $string['privacy:metadata:moochat_usage'] = 'Information about user interactions with MooChat activities';
 $string['privacy:metadata:moochat_usage:userid'] = 'The ID of the user';
 $string['privacy:metadata:moochat_usage:messagecount'] = 'Number of messages sent';
 $string['privacy:metadata:moochat_usage:firstmessage'] = 'Timestamp of first message';
 $string['privacy:metadata:moochat_usage:lastmessage'] = 'Timestamp of last message';
+$string['privacy:metadata:moochat_conversations'] = 'Stores chat conversations between students and the AI assistant';
+$string['privacy:metadata:moochat_conversations:userid'] = 'The ID of the user';
+$string['privacy:metadata:moochat_conversations:moochatid'] = 'The MooChat activity ID';
+$string['privacy:metadata:moochat_conversations:role'] = 'The role of the message sender (user or assistant)';
+$string['privacy:metadata:moochat_conversations:message'] = 'The message content';
+$string['privacy:metadata:moochat_conversations:timecreated'] = 'When the message was created';
+
 // JavaScript strings
 $string['questionsremaining_js'] = 'Questions remaining';
 $string['thinking_js'] = 'Thinking...';

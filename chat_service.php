@@ -7,7 +7,7 @@
 // (at your option) any later version.
 
 /**
- * Define all the restore steps that will be used by the restore_moochat_activity_task
+ * Chat service for mod_moochat
  *
  * @package    mod_moochat
  * @copyright  2025 Brian A. Pool
@@ -112,12 +112,7 @@ if ($moochat->include_section_content) {
     
     $include_hidden = isset($moochat->include_hidden_content) ? $moochat->include_hidden_content : 0;
     $sectioncontent = moochat_get_section_content($moochat->course, $sectionnum, $include_hidden);
-    
-    /*/ DEBUG - Log what we got
-    error_log("Section number: " . $sectionnum);
-    error_log("Section content length: " . strlen($sectioncontent));
-    error_log("Section content preview: " . substr($sectioncontent, 0, 500));*/
-    
+     
     $fullprompt .= $sectioncontent;
 }
 
@@ -134,6 +129,7 @@ foreach ($history as $msg) {
 $fullprompt .= "User: " . $message . "\nAssistant:";
 
 try {
+    
     // Create AI action using Moodle's core AI system
     $action = new \core_ai\aiactions\generate_text(
         contextid: $context->id,
@@ -141,12 +137,34 @@ try {
         prompttext: $fullprompt
     );
     
+   
     // Get AI manager and process the action
     $manager = \core\di::get(\core_ai\manager::class);
     $response = $manager->process_action($action);
     
     if ($response->get_success()) {
         $reply = $response->get_response_data()['generatedcontent'] ?? '';
+                
+        // Log the conversation to database
+        $now = time();
+        
+        // Save user message
+        $userrecord = new stdClass();
+        $userrecord->moochatid = $moochatid;
+        $userrecord->userid = $USER->id;
+        $userrecord->role = 'user';
+        $userrecord->message = $message;
+        $userrecord->timecreated = $now;
+        $DB->insert_record('moochat_conversations', $userrecord);
+        
+        // Save assistant message
+        $assistantrecord = new stdClass();
+        $assistantrecord->moochatid = $moochatid;
+        $assistantrecord->userid = $USER->id;
+        $assistantrecord->role = 'assistant';
+        $assistantrecord->message = trim($reply);
+        $assistantrecord->timecreated = $now;
+        $DB->insert_record('moochat_conversations', $assistantrecord);
         
         // Update usage counter if rate limiting is enabled
         if ($ratelimit_enabled && isset($usage)) {

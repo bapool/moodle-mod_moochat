@@ -7,23 +7,32 @@
 // (at your option) any later version.
 
 /**
- * Define all the restore steps that will be used by the restore_moochat_activity_task
+ * Web service definitions for mod_moochat
  *
  * @package    mod_moochat
- * @copyright  2025 Brian A. Pool
+ * @copyright  2026 Brian A. Pool
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$functions = [
-    'mod_moochat_send_message' => [
+$functions = array(
+    'mod_moochat_send_message' => array(
         'classname'   => 'mod_moochat\external\send_message',
         'methodname'  => 'execute',
-        'description' => 'Send a chat message and receive AI response',
+        'classpath'   => '',
+        'description' => 'Send a message to the AI and get a response',
         'type'        => 'write',
         'ajax'        => true,
-        'capabilities'=> 'mod/moochat:submit',
         'loginrequired' => true,
-    ],
-];
+    ),
+    'mod_moochat_save_conversation' => array(
+        'classname'   => 'mod_moochat\external\save_conversation',
+        'methodname'  => 'execute',
+        'classpath'   => '',
+        'description' => 'Save a conversation exchange to the database',
+        'type'        => 'write',
+        'ajax'        => true,
+        'loginrequired' => true,
+    ),
+);

@@ -1,12 +1,17 @@
+gedit /var/www/html/mod/moochat/readme.txt
+```
+
+**Complete file contents:**
+```
 ==============================================================================
 MooChat Activity Module for Moodle
 ==============================================================================
 
 Author: Brian A. Pool
 Organization: National Trail Local Schools
-Version: 1.1
+Version: 1.3.0
 License: GNU GPL v3 or later
-Moodle Required: 4.0 or higher
+Moodle Required: 4.5 or higher
 
 ==============================================================================
 DESCRIPTION
@@ -43,6 +48,10 @@ KEY FEATURES
   right
 - Message Formatting - Long AI responses are formatted with paragraphs, line 
   breaks, and bullet points for readability
+- Conversation History - Teachers can view complete student-AI conversation 
+  histories organized by date
+- Student Usage Tracking - See which students are using the chatbot and how 
+  much they're engaging
 
 ==============================================================================
 SYSTEM REQUIREMENTS
@@ -144,6 +153,7 @@ Best Practices:
 - Enable section content for context-aware responses
 - Use inline display for always-available assistance
 - Use separate page for focused chat sessions
+- Review conversation histories to understand student engagement
 
 FOR STUDENTS:
 
@@ -162,6 +172,37 @@ Tips:
 - Reference course materials when enabled
 - Be patient - AI responses may take a few seconds
 - Your question limit (if set) persists across sessions
+
+==============================================================================
+CONVERSATION HISTORY (TEACHERS ONLY)
+==============================================================================
+
+Teachers with the 'mod/moochat:viewhistory' capability can view complete 
+conversation histories for all students.
+
+Accessing History:
+1. Open the MooChat activity as a teacher
+2. Click the "History" button in the left sidebar
+3. View the list of students who have used the chatbot
+4. Click "View Details" to see a student's full conversation
+
+History Display:
+- Conversations are organized by date
+- Each day can be expanded/collapsed
+- Shows both student questions and AI responses
+- Displays timestamps for each message
+- Use "Expand All" / "Collapse All" for quick navigation
+
+Data Management:
+- Conversations are automatically saved as students chat
+- Data is deleted when the activity is deleted
+- Data can be reset using course reset functionality
+- Included in course backup/restore (with user data)
+
+Privacy:
+- Only teachers can access conversation histories
+- Students cannot see other students' conversations
+- Complies with GDPR and privacy regulations
 
 ==============================================================================
 SECTION CONTENT INTEGRATION
@@ -210,11 +251,17 @@ Formatting Issues:
 - Clear browser cache and refresh page
 - Check that JavaScript is enabled in browser
 
+History Not Showing:
+- Verify conversations exist in database: [prefix]_moochat_conversations
+- Check that you have mod/moochat:viewhistory capability
+- Purge Moodle caches if recently upgraded
+- Check that web service is registered: mod_moochat_save_conversation
+
 ==============================================================================
 DATABASE TABLES
 ==============================================================================
 
-This plugin creates two tables:
+This plugin creates three tables:
 
 [prefix]_moochat
 - Stores activity instances and configuration
@@ -222,6 +269,11 @@ This plugin creates two tables:
 [prefix]_moochat_usage  
 - Tracks student usage for rate limiting
 - Automatically cleaned every 7 days
+
+[prefix]_moochat_conversations
+- Stores complete conversation history (user and AI messages)
+- Deleted when activity is deleted or course is reset
+- Included in backup/restore with user data
 
 ==============================================================================
 SUPPORT & DEVELOPMENT
@@ -256,13 +308,21 @@ ACKNOWLEDGMENTS
 ==============================================================================
 
 Special thanks to:
-- Anthropic for AI assistance in development
 - The Moodle community for ongoing support and inspiration
 - National Trail Local Schools for supporting innovative educational technology
 
 ==============================================================================
 CHANGELOG
 ==============================================================================
+
+Version 1.3.0 (2026-02-18)
+- Added conversation history tracking
+- Teachers can view complete student-AI conversation histories
+- New History page with collapsible date organization
+- Conversations automatically saved via web service
+- Proper backup/restore support for conversation data
+- Privacy-compliant data export and deletion
+- New capability: mod/moochat:viewhistory
 
 Version 1.0 (2025-10-30)
 - Initial release

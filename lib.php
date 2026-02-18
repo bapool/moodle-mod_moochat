@@ -55,10 +55,59 @@ function moochat_delete_instance($id) {
     // Delete usage records
     $DB->delete_records('moochat_usage', array('moochatid' => $id));
     
+    // Delete conversation records
+    $DB->delete_records('moochat_conversations', array('moochatid' => $id));
+    
     // Delete the instance
     $DB->delete_records('moochat', array('id' => $id));
     
     return true;
+}
+
+/**
+ * Reset course - delete all conversation data
+ */
+function moochat_reset_userdata($data) {
+    global $DB;
+    
+    $status = array();
+    $componentstr = get_string('modulenameplural', 'moochat');
+    
+    if (!empty($data->reset_moochat_conversations)) {
+        // Get all moochat instances in this course
+        $moochats = $DB->get_records('moochat', array('course' => $data->courseid));
+        
+        foreach ($moochats as $moochat) {
+            // Delete all conversations
+            $DB->delete_records('moochat_conversations', array('moochatid' => $moochat->id));
+            
+            // Delete all usage records
+            $DB->delete_records('moochat_usage', array('moochatid' => $moochat->id));
+        }
+        
+        $status[] = array(
+            'component' => $componentstr,
+            'item' => get_string('viewconversations', 'moochat'),
+            'error' => false
+        );
+    }
+    
+    return $status;
+}
+
+/**
+ * Define reset options
+ */
+function moochat_reset_course_form_definition(&$mform) {
+    $mform->addElement('header', 'moochatheader', get_string('modulenameplural', 'moochat'));
+    $mform->addElement('checkbox', 'reset_moochat_conversations', get_string('viewconversations', 'moochat'));
+}
+
+/**
+ * Default values for reset form
+ */
+function moochat_reset_course_form_defaults($course) {
+    return array('reset_moochat_conversations' => 1);
 }
 
 /**

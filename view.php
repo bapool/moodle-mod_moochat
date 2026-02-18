@@ -88,6 +88,14 @@ if ($avatarurl) {
 }
 echo '<h3 class="moochat-sidebar-title">' . format_string($moochat->name) . '</h3>';
 
+// Show History link for teachers
+if (has_capability('mod/moochat:viewhistory', $context)) {
+    $historyurl = new moodle_url('/mod/moochat/history.php', array('id' => $cm->id));
+    echo '<div class="moochat-history-link">';
+    echo html_writer::link($historyurl, get_string('history', 'moochat'), array('class' => 'btn btn-secondary btn-sm'));
+    echo '</div>';
+}
+
 // Show questions remaining
 echo '<div class="moochat-remaining-sidebar" id="moochat-remaining-' . $moochat->id . '"></div>';
 

@@ -7,10 +7,10 @@
 // (at your option) any later version.
 
 /**
- * Define all the restore steps that will be used by the restore_moochat_activity_task
+ * Privacy provider for mod_moochat
  *
  * @package    mod_moochat
- * @copyright  2025 Brian A. Pool
+ * @copyright  2026 Brian A. Pool
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -48,6 +48,18 @@ class provider implements
             'privacy:metadata:moochat_usage'
         );
 
+        $collection->add_database_table(
+            'moochat_conversations',
+            [
+                'userid' => 'privacy:metadata:moochat_conversations:userid',
+                'moochatid' => 'privacy:metadata:moochat_conversations:moochatid',
+                'role' => 'privacy:metadata:moochat_conversations:role',
+                'message' => 'privacy:metadata:moochat_conversations:message',
+                'timecreated' => 'privacy:metadata:moochat_conversations:timecreated',
+            ],
+            'privacy:metadata:moochat_conversations'
+        );
+
         return $collection;
     }
 
@@ -63,13 +75,15 @@ class provider implements
             INNER JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
             INNER JOIN {modules} m ON m.id = cm.module AND m.name = :modname
             INNER JOIN {moochat} mc ON mc.id = cm.instance
-            INNER JOIN {moochat_usage} mu ON mu.moochatid = mc.id
-                 WHERE mu.userid = :userid";
+             LEFT JOIN {moochat_usage} mu ON mu.moochatid = mc.id
+             LEFT JOIN {moochat_conversations} mconv ON mconv.moochatid = mc.id
+                 WHERE mu.userid = :userid1 OR mconv.userid = :userid2";
 
         $params = [
             'modname' => 'moochat',
             'contextlevel' => CONTEXT_MODULE,
-            'userid' => $userid,
+            'userid1' => $userid,
+            'userid2' => $userid,
         ];
 
         $contextlist = new contextlist();
@@ -103,6 +117,16 @@ class provider implements
         ];
 
         $userlist->add_from_sql('userid', $sql, $params);
+
+        // Also get users from conversations table.
+        $sql = "SELECT mconv.userid
+                  FROM {course_modules} cm
+            INNER JOIN {modules} m ON m.id = cm.module AND m.name = :modname
+            INNER JOIN {moochat} mc ON mc.id = cm.instance
+            INNER JOIN {moochat_conversations} mconv ON mconv.moochatid = mc.id
+                 WHERE cm.id = :cmid";
+
+        $userlist->add_from_sql('userid', $sql, $params);
     }
 
     /**
@@ -121,6 +145,7 @@ class provider implements
 
         list($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
 
+        // Export usage data.
         $sql = "SELECT cm.id AS cmid,
                        mu.messagecount,
                        mu.firstmessage,
@@ -153,6 +178,38 @@ class provider implements
             ];
             writer::with_context($context)->export_data([], (object)$data);
         }
+
+        // Export conversation data.
+        $sql = "SELECT cm.id AS cmid,
+                       mconv.id,
+                       mconv.role,
+                       mconv.message,
+                       mconv.timecreated,
+                       mc.name
+                  FROM {context} c
+            INNER JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
+            INNER JOIN {modules} m ON m.id = cm.module AND m.name = :modname
+            INNER JOIN {moochat} mc ON mc.id = cm.instance
+            INNER JOIN {moochat_conversations} mconv ON mconv.moochatid = mc.id
+                 WHERE c.id {$contextsql}
+                       AND mconv.userid = :userid
+              ORDER BY cm.id, mconv.timecreated ASC";
+
+        $conversations = $DB->get_records_sql($sql, $params);
+
+        foreach ($conversations as $conversation) {
+            $context = \context_module::instance($conversation->cmid);
+            $data = [
+                'role' => $conversation->role,
+                'message' => $conversation->message,
+                'timecreated' => \core_privacy\local\request\transform::datetime($conversation->timecreated),
+            ];
+            writer::with_context($context)->export_related_data(
+                [],
+                'conversations',
+                (object)$data
+            );
+        }
     }
 
     /**
@@ -173,6 +230,7 @@ class provider implements
         }
 
         $DB->delete_records('moochat_usage', ['moochatid' => $cm->instance]);
+        $DB->delete_records('moochat_conversations', ['moochatid' => $cm->instance]);
     }
 
     /**
@@ -197,6 +255,7 @@ class provider implements
                 continue;
             }
             $DB->delete_records('moochat_usage', ['moochatid' => $cm->instance, 'userid' => $userid]);
+            $DB->delete_records('moochat_conversations', ['moochatid' => $cm->instance, 'userid' => $userid]);
         }
     }
 
@@ -224,6 +283,8 @@ class provider implements
 
         $select = "moochatid = :moochatid AND userid $usersql";
         $params = ['moochatid' => $cm->instance] + $userparams;
+        
         $DB->delete_records_select('moochat_usage', $select, $params);
+        $DB->delete_records_select('moochat_conversations', $select, $params);
     }
 }

@@ -45,6 +45,15 @@
     font-size: 14px;
 }
 
+/* History link in sidebar */
+.moochat-history-link {
+    margin: 15px 0;
+}
+
+.moochat-history-link .btn {
+    width: 100%;
+}
+
 /* Right side - Chat area */
 .moochat-chat-area {
     flex: 1;
@@ -203,6 +212,107 @@
     background: #555;
 }
 
+/* History page styles */
+.moochat-conversation-view {
+    margin: 20px 0;
+}
+
+.moochat-day-section {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.moochat-day-header {
+    width: 100%;
+    background: #f8f9fa;
+    border: none;
+    padding: 15px 20px;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+.moochat-day-header:hover {
+    background: #e9ecef;
+}
+
+.moochat-day-label {
+    flex: 1;
+}
+
+.moochat-day-count {
+    color: #666;
+    font-weight: normal;
+    font-size: 14px;
+    margin: 0 10px;
+}
+
+.moochat-collapse-icon {
+    transition: transform 0.2s;
+}
+
+.moochat-day-header[aria-expanded="true"] .moochat-collapse-icon {
+    transform: rotate(180deg);
+}
+
+.moochat-day-messages {
+    padding: 20px;
+    background: white;
+}
+
+.moochat-message-user {
+    background: #e3f2fd;
+    border-left: 4px solid #2196f3;
+}
+
+.moochat-message-assistant {
+    background: #f5f5f5;
+    border-left: 4px solid #9e9e9e;
+}
+
+.moochat-message {
+    margin-bottom: 15px;
+    padding: 12px 15px;
+    border-radius: 4px;
+}
+
+.moochat-message-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.moochat-message-name {
+    color: #333;
+    font-weight: bold;
+}
+
+.moochat-message-time {
+    color: #666;
+    font-size: 12px;
+}
+
+.moochat-message-content {
+    color: #333;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.moochat-controls {
+    display: flex;
+    gap: 10px;
+}
+
 /* Responsive design for smaller screens */
 @media (max-width: 768px) {
     .moochat-activity-container {
@@ -224,5 +334,14 @@
     padding: 15px;
     margin-bottom: 15px;
     flex: 1;
+    }
+    
+    .moochat-day-header {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+    
+    .moochat-day-count {
+        font-size: 12px;
     }
 }

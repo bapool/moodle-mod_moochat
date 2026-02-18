@@ -7,7 +7,7 @@
 // (at your option) any later version.
 
 /**
- * Define all the restore steps that will be used by the restore_moochat_activity_task
+ * Capability definitions for mod_moochat
  *
  * @package    mod_moochat
  * @copyright  2025 Brian A. Pool
@@ -17,7 +17,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
-
     'mod/moochat:addinstance' => array(
         'riskbitmask' => RISK_XSS,
         'captype' => 'write',
@@ -28,7 +27,6 @@ $capabilities = array(
         ),
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
-
     'mod/moochat:view' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -40,13 +38,21 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
-
     'mod/moochat:submit' => array(
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
             'student' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+    'mod/moochat:viewhistory' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW

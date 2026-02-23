@@ -41,6 +41,7 @@ $string['chatsize_medium'] = 'Medium (400px messages, 500px total)';
 $string['chatsize_large'] = 'Large (600px messages, 700px total)';
 $string['include_section_content'] = 'Include Section Content';
 $string['include_section_content_help'] = 'When enabled, the AI will have access to all content in the current course section, including pages, books, labels, assignments, URLs, and glossary entries. This allows the chatbot to answer questions about course materials in context.';
+$string['include_section_content_warning'] = 'Warning: Sections with excessive or varied content can result in slower and lower quality responses.';
 $string['include_hidden_content'] = 'Include Hidden Content';
 $string['include_hidden_content_help'] = 'When enabled, hidden activities and resources will be included in the section content provided to the AI. This allows the chatbot to answer questions about upcoming or draft content. Note: Students will still see responses based on hidden content if this is enabled.';
 $string['avatar'] = 'Avatar Image';
@@ -77,6 +78,8 @@ $string['temperature_help'] = 'Lower values (0.1-0.3) make responses more focuse
 
 // Chat interface
 $string['startchat'] = 'Start chatting with the AI assistant!';
+$string['startchatwith'] = 'Start chatting with {$a}!';
+$string['chattingwith'] = 'Clear the chat to start a new topic.';
 $string['typemessage'] = 'Type your message here...';
 $string['send'] = 'Send';
 $string['clear'] = 'Clear Chat';

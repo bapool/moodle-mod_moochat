@@ -58,7 +58,7 @@ class chat_interface implements renderable, templatable {
         $data->sizeclass = 'moochat-size-' . $this->moochat->chatsize;
         
         // Language strings
-        $data->startchat = get_string('startchat', 'moochat');
+        $data->startchat = get_string('startchatwith', 'moochat', $data->name);
         $data->typemessage = get_string('typemessage', 'moochat');
         $data->send = get_string('send', 'moochat');
         $data->clear = get_string('clear', 'moochat');

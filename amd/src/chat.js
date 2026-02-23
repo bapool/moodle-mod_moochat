@@ -19,6 +19,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
 
             var conversationHistory = [];
             var remainingQuestions = -1; // -1 means unlimited
+            var hasChattedOnce = false; // track if student has sent at least one message
 
             // Load language strings
             var strings = [];
@@ -29,7 +30,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                 {key: 'error_title', component: 'mod_moochat'},
                 {key: 'connectionerror', component: 'mod_moochat'},
                 {key: 'chatcleared', component: 'mod_moochat'},
-                {key: 'confirmclear', component: 'mod_moochat'}
+                {key: 'confirmclear', component: 'mod_moochat'},
+                {key: 'chattingwith', component: 'mod_moochat'}
             ]).done(function(s) {
                 strings = s;
             });
@@ -114,6 +116,12 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                             role: 'assistant',
                             content: response.reply
                         });
+
+                        // After first successful exchange, swap welcome message to chattingwith hint
+                        if (!hasChattedOnce) {
+                            hasChattedOnce = true;
+                            messagesDiv.find('p.moochat-welcome').text(strings[7]);
+                        }
 
                         // Save conversation to database
                         Ajax.call([{
@@ -222,6 +230,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             // Clear chat (visual only - doesn't reset server counter)
             var clearChat = function() {
                 conversationHistory = [];
+                hasChattedOnce = false;
                 messagesDiv.html('<p class="moochat-welcome">' + strings[5] + '</p>');
                 inputField.val('').focus();
                 // Note: remaining questions counter stays the same

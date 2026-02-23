@@ -108,7 +108,7 @@ echo '<div class="moochat-interface ' . $sizeclass . '" id="moochat-' . $moochat
 
 // Chat messages area
 echo '<div class="moochat-messages" id="moochat-messages-' . $moochat->id . '">';
-echo '<p class="moochat-welcome">' . get_string('startchat', 'moochat') . '</p>';
+echo '<p class="moochat-welcome">' . get_string('startchatwith', 'moochat', format_string($moochat->name)) . '</p>';
 echo '</div>';
 
 // Input area

@@ -68,12 +68,20 @@ class mod_moochat_mod_form extends moodleform_mod {
         $mform->addHelpButton('include_section_content', 'include_section_content', 'moochat');
         $mform->setDefault('include_section_content', 0);
 
+        // Warning about section content
+        $warninghtml = '<div class="alert alert-warning">' .
+                       get_string('include_section_content_warning', 'moochat') .
+                       '</div>';
+        $mform->addElement('static', 'include_section_content_warning', '', $warninghtml);
+        $mform->hideIf('include_section_content_warning', 'include_section_content');
+
         // Include hidden content (only shows if section content is enabled)
         $mform->addElement('advcheckbox', 'include_hidden_content', 
                           get_string('include_hidden_content', 'moochat'));
         $mform->addHelpButton('include_hidden_content', 'include_hidden_content', 'moochat');
         $mform->setDefault('include_hidden_content', 0);
         $mform->hideIf('include_hidden_content', 'include_section_content');
+
         // Avatar Image Upload
         $mform->addElement('filemanager', 'avatar', 
                           get_string('avatar', 'moochat'),

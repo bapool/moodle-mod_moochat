@@ -155,6 +155,7 @@ function mod_moochat_pluginfile($course, $cm, $context, $filearea, $args, $force
     
     send_stored_file($file, 86400, 0, $forcedownload, $options);
 }
+
 /**
  * Return the content to display inline on course page
  */
@@ -196,6 +197,7 @@ function moochat_get_coursemodule_info($coursemodule) {
     
     return $info;
 }
+
 /**
  * Callback to add JS when course page loads
  */
@@ -209,11 +211,12 @@ function moochat_cm_info_view(cm_info $cm) {
         $PAGE->requires->js_call_amd('mod_moochat/chat', 'init', array($moochat->id));
     }
 }
+
 /**
  * Extract content from the current section
  */
 function moochat_get_section_content($courseid, $sectionnum, $includehidden = false) {
-    global $DB;
+    global $DB, $CFG;
     
     $content = "\n\n=== COURSE SECTION CONTENT ===\n\n";
     
@@ -282,6 +285,80 @@ function moochat_get_section_content($courseid, $sectionnum, $includehidden = fa
                     $content .= "Glossary Entries:\n";
                     foreach ($entries as $entry) {
                         $content .= "- " . format_string($entry->concept) . ": " . strip_tags($entry->definition) . "\n";
+                    }
+                }
+                break;
+
+            case 'resource':
+                $fs = get_file_storage();
+                $context = context_module::instance($cmid);
+                $files = $fs->get_area_files($context->id, 'mod_resource', 'content', 0, 'filename', false);
+                foreach ($files as $file) {
+                    $mimetype = $file->get_mimetype();
+                    $fileext  = strtolower(pathinfo($file->get_filename(), PATHINFO_EXTENSION));
+
+                    if ($mimetype === 'application/pdf' || $fileext === 'pdf') {
+                        // Extract text from PDF.
+                        // Try pdftotext first (poppler-utils) as it handles more PDF types.
+                        // Fall back to smalot/pdfparser if pdftotext is not available.
+                        $tmpfile = tempnam(sys_get_temp_dir(), 'moochat_pdf_') . '.pdf';
+                        $file->copy_content_to($tmpfile);
+                        $pdftext = '';
+
+                        $pdftotext = trim(shell_exec('which pdftotext 2>/dev/null'));
+                        if (!empty($pdftotext)) {
+                            // pdftotext is available - use it
+                            $pdftext = shell_exec('pdftotext ' . escapeshellarg($tmpfile) . ' -');
+                        }
+
+                        if (empty($pdftext)) {
+                            // Fall back to smalot/pdfparser
+                            $autoload = $CFG->dirroot . '/mod/moochat/vendor/autoload.php';
+                            if (file_exists($autoload)) {
+                                require_once($autoload);
+                                try {
+                                    $parser = new \Smalot\PdfParser\Parser();
+                                    $pdf = $parser->parseFile($tmpfile);
+                                    $pdftext = $pdf->getText();
+                                } catch (\Exception $e) {
+                                    error_log('MooChat: Error parsing PDF ' . $file->get_filename() . ': ' . $e->getMessage());
+                                }
+                            }
+                        }
+
+                        if (!empty($pdftext)) {
+                            $content .= $pdftext . "\n";
+                        } else {
+                            error_log('MooChat: Could not extract text from PDF ' . $file->get_filename());
+                        }
+                        unlink($tmpfile);
+
+                    } else if (
+                        $mimetype === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+                        $fileext === 'pptx'
+                    ) {
+                        // Extract text from PPTX by iterating slide XML files.
+                        $tmpfile = tempnam(sys_get_temp_dir(), 'moochat_pptx_') . '.pptx';
+                        $file->copy_content_to($tmpfile);
+                        $zip_handle = new \ZipArchive();
+                        if ($zip_handle->open($tmpfile) === true) {
+                            $slide_number = 1;
+                            $doc = new \DOMDocument();
+                            while (($xml_index = $zip_handle->locateName('ppt/slides/slide' . $slide_number . '.xml')) !== false) {
+                                $xml_data = $zip_handle->getFromIndex($xml_index);
+                                $doc->loadXML($xml_data, LIBXML_NOENT | LIBXML_XINCLUDE | LIBXML_NOERROR | LIBXML_NOWARNING);
+                                $content .= strip_tags($doc->saveXML()) . "\n";
+                                $slide_number++;
+                            }
+                            $zip_handle->close();
+                        } else {
+                            error_log('MooChat: Error opening PPTX file ' . $file->get_filename());
+                        }
+                        unlink($tmpfile);
+
+                    } else if (strpos($mimetype, 'text/') === 0) {
+                        // Plain text files (txt, csv, html, etc.)
+                        $content .= strip_tags($file->get_content()) . "\n";
                     }
                 }
                 break;

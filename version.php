@@ -15,6 +15,6 @@
 defined('MOODLE_INTERNAL') || die();
 $plugin->component = 'mod_moochat';
 $plugin->requires = 2024042200; // Moodle 4.5
-$plugin->version = 2026021801;  // YYYYMMDDXX - Added conversation history tracking
+$plugin->version = 2026022201;  // YYYYMMDDXX - Added conversation history tracking
 $plugin->maturity = MATURITY_BETA;
-$plugin->release = 'v1.3.0';
+$plugin->release = 'v1.4.0';

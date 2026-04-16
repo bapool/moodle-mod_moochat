@@ -5,57 +5,75 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Capability definitions for mod_moochat
  *
  * @package    mod_moochat
- * @copyright  2025 Brian A. Pool
+ * @copyright  2026 Brian A. Pool
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
-    'mod/moochat:addinstance' => array(
+$capabilities = [
+    'mod/moochat:addinstance' => [
         'riskbitmask' => RISK_XSS,
-        'captype' => 'write',
+        'captype'     => 'write',
         'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
+        'archetypes'  => [
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ),
-        'clonepermissionsfrom' => 'moodle/course:manageactivities'
-    ),
-    'mod/moochat:view' => array(
-        'captype' => 'read',
+            'manager'        => CAP_ALLOW,
+        ],
+        'clonepermissionsfrom' => 'moodle/course:manageactivities',
+    ],
+    'mod/moochat:view' => [
+        'captype'     => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'guest' => CAP_ALLOW,
-            'student' => CAP_ALLOW,
-            'teacher' => CAP_ALLOW,
+        'archetypes'  => [
+            'guest'          => CAP_ALLOW,
+            'student'        => CAP_ALLOW,
+            'teacher'        => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-    'mod/moochat:submit' => array(
+            'manager'        => CAP_ALLOW,
+        ],
+    ],
+    'mod/moochat:submit' => [
         'riskbitmask' => RISK_SPAM,
-        'captype' => 'write',
+        'captype'     => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'student' => CAP_ALLOW,
-            'teacher' => CAP_ALLOW,
+        'archetypes'  => [
+            'student'        => CAP_ALLOW,
+            'teacher'        => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-    'mod/moochat:viewhistory' => array(
-        'captype' => 'read',
+            'manager'        => CAP_ALLOW,
+        ],
+    ],
+    'mod/moochat:viewhistory' => [
+        'captype'     => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'teacher' => CAP_ALLOW,
+        'archetypes'  => [
+            'teacher'        => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-);
+            'manager'        => CAP_ALLOW,
+        ],
+    ],
+    'mod/moochat:grade' => [
+        'riskbitmask' => RISK_PERSONAL,
+        'captype'     => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes'  => [
+            'teacher'        => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager'        => CAP_ALLOW,
+        ],
+    ],
+];

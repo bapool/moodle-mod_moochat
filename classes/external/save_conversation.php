@@ -4,7 +4,15 @@
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
-// any later version.
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * External service for saving chat conversations
@@ -34,59 +42,61 @@ class save_conversation extends external_api {
      */
     public static function execute_parameters() {
         return new external_function_parameters([
-            'moochatid' => new external_value(PARAM_INT, 'MooChat activity ID'),
-            'usermessage' => new external_value(PARAM_TEXT, 'User message'),
-            'assistantmessage' => new external_value(PARAM_TEXT, 'Assistant reply'),
+            'moochatid'        => new external_value(PARAM_INT,              'MooChat activity ID'),
+            'usermessage'      => new external_value(PARAM_TEXT,             'User message'),
+            'assistantmessage' => new external_value(PARAM_TEXT,             'Assistant reply'),
+            'sessionid'        => new external_value(PARAM_ALPHANUMEXT, 'Client session UUID', VALUE_DEFAULT, ''),
         ]);
     }
 
     /**
-     * Save a conversation exchange to the database
+     * Save a conversation exchange to the database.
      *
-     * @param int $moochatid MooChat activity ID
-     * @param string $usermessage User's message
-     * @param string $assistantmessage Assistant's reply
-     * @return array Response with success status
+     * @param int    $moochatid
+     * @param string $usermessage
+     * @param string $assistantmessage
+     * @param string $sessionid
+     * @return array
      */
-    public static function execute($moochatid, $usermessage, $assistantmessage) {
+    public static function execute($moochatid, $usermessage, $assistantmessage, $sessionid = '') {
         global $DB, $USER;
-        
-        // Validate parameters
+
         $params = self::validate_parameters(self::execute_parameters(), [
-            'moochatid' => $moochatid,
-            'usermessage' => $usermessage,
+            'moochatid'        => $moochatid,
+            'usermessage'      => $usermessage,
             'assistantmessage' => $assistantmessage,
+            'sessionid'        => $sessionid,
         ]);
 
-        // Get course module and validate context
-        $cm = get_coursemodule_from_instance('moochat', $params['moochatid'], 0, false, MUST_EXIST);
+        $cm      = get_coursemodule_from_instance('moochat', $params['moochatid'], 0, false, MUST_EXIST);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_login();
 
         $now = time();
+        $sid = clean_param($params['sessionid'], PARAM_ALPHANUMEXT);
 
-        // Save user message
-        $userrecord = new \stdClass();
-        $userrecord->moochatid = $params['moochatid'];
-        $userrecord->userid = $USER->id;
-        $userrecord->role = 'user';
-        $userrecord->message = $params['usermessage'];
+        // Save user message.
+        $userrecord              = new \stdClass();
+        $userrecord->moochatid   = $params['moochatid'];
+        $userrecord->userid      = $USER->id;
+        $userrecord->sessionid   = $sid;
+        $userrecord->role        = 'user';
+        $userrecord->message     = $params['usermessage'];
         $userrecord->timecreated = $now;
         $DB->insert_record('moochat_conversations', $userrecord);
 
-        // Save assistant message
-        $assistantrecord = new \stdClass();
-        $assistantrecord->moochatid = $params['moochatid'];
-        $assistantrecord->userid = $USER->id;
-        $assistantrecord->role = 'assistant';
-        $assistantrecord->message = $params['assistantmessage'];
+        // Save assistant message.
+        $assistantrecord              = new \stdClass();
+        $assistantrecord->moochatid   = $params['moochatid'];
+        $assistantrecord->userid      = $USER->id;
+        $assistantrecord->sessionid   = $sid;
+        $assistantrecord->role        = 'assistant';
+        $assistantrecord->message     = $params['assistantmessage'];
         $assistantrecord->timecreated = $now;
         $DB->insert_record('moochat_conversations', $assistantrecord);
 
-        return [
-            'success' => true,
-        ];
+        return ['success' => true];
     }
 
     /**

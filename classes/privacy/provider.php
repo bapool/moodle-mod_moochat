@@ -60,6 +60,18 @@ class provider implements
             'privacy:metadata:moochat_conversations'
         );
 
+        $collection->add_database_table(
+            'moochat_objective_results',
+            [
+                'userid'         => 'privacy:metadata:moochat_objective_results:userid',
+                'moochatid'      => 'privacy:metadata:moochat_objective_results:moochatid',
+                'objectiveindex' => 'privacy:metadata:moochat_objective_results:objectiveindex',
+                'met'            => 'privacy:metadata:moochat_objective_results:met',
+                'timechecked'    => 'privacy:metadata:moochat_objective_results:timechecked',
+            ],
+            'privacy:metadata:moochat_objective_results'
+        );
+
         return $collection;
     }
 
@@ -231,6 +243,7 @@ class provider implements
 
         $DB->delete_records('moochat_usage', ['moochatid' => $cm->instance]);
         $DB->delete_records('moochat_conversations', ['moochatid' => $cm->instance]);
+        $DB->delete_records('moochat_objective_results', ['moochatid' => $cm->instance]);
     }
 
     /**
@@ -256,6 +269,7 @@ class provider implements
             }
             $DB->delete_records('moochat_usage', ['moochatid' => $cm->instance, 'userid' => $userid]);
             $DB->delete_records('moochat_conversations', ['moochatid' => $cm->instance, 'userid' => $userid]);
+            $DB->delete_records('moochat_objective_results', ['moochatid' => $cm->instance, 'userid' => $userid]);
         }
     }
 
@@ -286,5 +300,6 @@ class provider implements
         
         $DB->delete_records_select('moochat_usage', $select, $params);
         $DB->delete_records_select('moochat_conversations', $select, $params);
+        $DB->delete_records_select('moochat_objective_results', $select, $params);
     }
 }

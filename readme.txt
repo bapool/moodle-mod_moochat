@@ -1,71 +1,90 @@
-gedit /var/www/html/mod/moochat/readme.txt
-```
-
-**Complete file contents:**
-```
 ==============================================================================
 MooChat Activity Module for Moodle
 ==============================================================================
 
-Author: Brian A. Pool
+Author:       Brian A. Pool
 Organization: National Trail Local Schools
-Version: 1.3.0
-License: GNU GPL v3 or later
-Moodle Required: 4.5 or higher
+Version:      1.7.0
+License:      GNU GPL v3 or later
+Moodle Required: 4.4 or higher
 
 ==============================================================================
 DESCRIPTION
 ==============================================================================
 
-MooChat is an AI-powered chat activity module that brings intelligent 
-conversation capabilities to your Moodle courses. Teachers can create 
-customizable AI assistants with unique personalities, avatars, and purposes - 
-from subject tutors to historical figures.
+MooChat is an AI-powered chat activity module that brings intelligent
+conversation capabilities to your Moodle courses. Teachers can create
+customizable AI assistants with unique personalities, avatars, and purposes —
+from subject tutors to historical figures to fictional characters from
+literature.
 
-Unlike sidebar blocks, MooChat provides a full-featured activity that can be 
-displayed inline on the course page or as a dedicated activity page, making 
-it perfect for central course interactions.
+MooChat supports AI-based grading through learning objectives. Students chat
+naturally without knowing the objectives, and the AI automatically awards
+points as topics are covered. Only the student's best attempt is recorded in
+the gradebook.
+
+Teachers can upload course-specific content (PDF or text files) and restrict
+the AI to only answer from that material — perfect for ensuring students
+engage with assigned readings rather than relying on general AI knowledge.
 
 ==============================================================================
 KEY FEATURES
 ==============================================================================
 
-- Custom AI Personalities - Define unique system prompts for each chatbot
-- Flexible Display Modes - Choose between inline (embedded on course page) 
-  or separate page display
-- Avatar Support - Upload custom images with adjustable sizing (48-128px)
-- Adjustable Chat Size - Three size options (Small, Medium, Large) to fit 
-  your layout needs
-- Section Content Integration - AI can access course materials (pages, books, 
-  labels, assignments, URLs, glossary) from the current section
-- Hidden Content Option - Choose whether AI can reference hidden course 
-  materials
-- Rate Limiting - Prevent AI resource abuse with configurable question limits 
-  (per hour or per day)
-- Server-Side Tracking - Students cannot bypass limits by clearing chat
-- Auto-Cleanup - Usage records automatically purge after 7 days
-- Professional Layout - Horizontal design with avatar/info on left, chat on 
-  right
-- Message Formatting - Long AI responses are formatted with paragraphs, line 
-  breaks, and bullet points for readability
-- Conversation History - Teachers can view complete student-AI conversation 
-  histories organized by date
-- Student Usage Tracking - See which students are using the chatbot and how 
-  much they're engaging
+AI Chat:
+- Custom AI Personalities — Define unique system prompts for each chatbot
+- Flexible Display Modes — Inline on course page or separate activity page
+- Avatar Support — Upload custom images with adjustable sizing (48-128px)
+- Adjustable Chat Size — Small, Medium, or Large interface
+- Message Formatting — Long responses formatted with paragraphs and bullets
+
+Content Integration:
+- Upload PDF or text files directly to the activity for AI reference
+- "Only Use Uploaded Content" mode — AI restricted to uploaded files only
+- Section Content Integration — AI can access course pages, books, glossaries,
+  assignments, URLs, and labels from the current section
+- PDF extraction via pdftotext or bundled smalot/pdfparser library
+
+AI Grading with Learning Objectives:
+- Teachers enter objectives (one per line) — students never see them
+- Teacher provides a hint in the activity description to guide conversation
+- AI evaluates only the most recent exchange — max 1 objective per reply
+- Points revealed progressively as students discover topics through chat
+- Session-based scoring — each "Clear Chat" starts fresh
+- Only the student's best session score goes to the gradebook
+- Full gradebook integration with teacher override capability
+
+Conversation History (Teachers):
+- Complete student-AI conversation logs organized by session
+- Per-session score breakdown with best score highlighted
+- Student list shows best score instead of email
+- Expand/collapse individual sessions
+
+Rate Limiting:
+- Configurable question limits per hour or per day
+- Server-side tracking — cannot be bypassed by clearing chat
+- Auto-cleanup of usage records after 7 days
+
+Privacy & Security:
+- Full GDPR compliance with data export and deletion
+- Backup/restore support including conversation history
+- Teachers-only access to student conversations
 
 ==============================================================================
 SYSTEM REQUIREMENTS
 ==============================================================================
 
-- Moodle 4.0 or higher
+- Moodle 4.4 or higher
 - PHP 8.0 or higher
 - MySQL 5.7+ or MariaDB 10.2+ or PostgreSQL 9.6+
 - Moodle Core AI Subsystem configured with at least one AI provider
 
-IMPORTANT: This plugin requires Moodle's core AI subsystem to be configured. 
-You must have at least one AI provider enabled (OpenAI, Anthropic, Azure 
-OpenAI, or local models via Ollama). No external API keys or services beyond 
-what Moodle provides are required.
+RECOMMENDED:
+- poppler-utils installed on server (apt install poppler-utils) for PDF support
+  Falls back to bundled smalot/pdfparser if pdftotext is not available
+
+IMPORTANT: If nginx sits in front of Apache, set client_max_body_size to at
+least 10M in your nginx config to allow PDF uploads.
 
 ==============================================================================
 INSTALLATION
@@ -74,24 +93,24 @@ INSTALLATION
 OPTION 1: Manual Installation
 ------------------------------
 1. Download the plugin package
-2. Extract the contents to: [moodleroot]/mod/moochat
+2. Extract contents to: [moodleroot]/mod/moochat
 3. Navigate to: Site Administration > Notifications
 4. Click "Upgrade Moodle database now"
-5. Follow the on-screen instructions
+5. Follow on-screen instructions
 
 OPTION 2: Via Moodle Plugin Installer
 --------------------------------------
 1. Go to: Site Administration > Plugins > Install plugins
 2. Upload the plugin ZIP file
 3. Click "Install plugin from the ZIP file"
-4. Follow the on-screen instructions
+4. Follow on-screen instructions
 
 POST-INSTALLATION:
 ------------------
-1. Ensure Moodle's AI subsystem is configured:
+1. Configure Moodle AI subsystem:
    Site Administration > AI > AI providers
 2. Enable and configure at least one AI provider
-3. Test the configuration with a sample activity
+3. Test with a sample activity
 
 ==============================================================================
 CONFIGURATION
@@ -99,181 +118,149 @@ CONFIGURATION
 
 ACTIVITY SETTINGS:
 
-General Settings:
-- Chat Name - Give your AI assistant a descriptive name
-- Introduction - Describe the purpose of this chat (optional)
-- Display Mode - Choose "Separate page" or "Inline on course page"
-- Chat Interface Size - Select Small, Medium, or Large
-- Include Section Content - Enable to let AI access course materials
-- Include Hidden Content - Enable to include hidden materials (teachers only)
+General:
+- Chat Name — Name your AI assistant
+- Introduction — Describe the activity purpose (shown to students as hint)
+- Display Mode — Separate page or inline on course page
+- Chat Interface Size — Small, Medium, or Large
+- Include Section Content — Let AI access course section materials
+- Avatar — Upload image and set display size
+- System Prompt — Define AI personality and behavior
 
-AI Personality:
-- System Prompt - Define how the AI should behave and respond
-  Examples:
-  - "You are a friendly math tutor who explains step-by-step"
-  - "You are Benjamin Franklin discussing your inventions"
-  - "You are a Python programming expert"
+Course Content for AI (NEW in 1.7.0):
+- Upload Content Files — Upload up to 5 PDF or .txt files
+- Only Use Uploaded Content — When checked, AI answers ONLY from these files
+  When unchecked, files are provided as reference alongside general knowledge
 
-Avatar:
-- Upload an image to represent your chatbot
-- Choose avatar size (48px to 128px)
+Learning Objectives & Grading:
+- Objectives — One per line; students never see these directly
+  Example:
+    The student can name the three types of RAM sold today
+    The student can explain what CL timing means
+    The student can state the difference between DDR4 and DDR5
+- Grade — Set maximum points (0 = ungraded)
+- Use activity Introduction to give students a hint about what to discuss
 
 Rate Limiting:
-- Enable Rate Limiting - Turn on to prevent abuse
-- Rate Limit Period - Choose "Per Hour" or "Per Day"
-- Maximum Questions - Set the number of questions allowed
+- Enable Rate Limiting — Prevent AI resource abuse
+- Rate Limit Period — Per Hour or Per Day
+- Maximum Questions — Questions allowed per period
 
-Advanced Settings:
-- Maximum Messages per Session - Deprecated, use Rate Limiting instead
-- Temperature - Control AI creativity (0.1-0.9)
-
-==============================================================================
-USAGE
-==============================================================================
-
-FOR TEACHERS:
-
-Creating a MooChat Activity:
-1. Turn editing on in your course
-2. Click "Add an activity or resource"
-3. Select "MooChat" from the Activities section
-4. Configure the activity settings:
-   - Give it a name and description
-   - Choose display mode and size
-   - Upload an avatar (optional)
-   - Write a system prompt to define AI personality
-   - Enable section content if you want AI to reference course materials
-   - Set rate limits if desired
-5. Save and display
-
-Best Practices:
-- Write clear, specific system prompts
-- Test the chatbot before students use it
-- Use rate limiting to manage AI usage
-- Enable section content for context-aware responses
-- Use inline display for always-available assistance
-- Use separate page for focused chat sessions
-- Review conversation histories to understand student engagement
-
-FOR STUDENTS:
-
-Using MooChat:
-1. Navigate to the course section with MooChat
-2. If inline mode: Chat appears directly on the course page
-   If separate page: Click the activity link to open
-3. Type your question in the text box
-4. Press Enter or click "Send"
-5. Wait for the AI to respond
-6. Continue the conversation as needed
-7. Click "Clear Chat" to start a new conversation
-
-Tips:
-- Ask clear, specific questions
-- Reference course materials when enabled
-- Be patient - AI responses may take a few seconds
-- Your question limit (if set) persists across sessions
+Advanced:
+- Maximum Messages per Session — Hard limit per conversation
+- Temperature — AI creativity level (0.1 = focused, 0.9 = creative)
 
 ==============================================================================
-CONVERSATION HISTORY (TEACHERS ONLY)
+HOW AI GRADING WORKS
 ==============================================================================
 
-Teachers with the 'mod/moochat:viewhistory' capability can view complete 
-conversation histories for all students.
-
-Accessing History:
-1. Open the MooChat activity as a teacher
-2. Click the "History" button in the left sidebar
-3. View the list of students who have used the chatbot
-4. Click "View Details" to see a student's full conversation
-
-History Display:
-- Conversations are organized by date
-- Each day can be expanded/collapsed
-- Shows both student questions and AI responses
-- Displays timestamps for each message
-- Use "Expand All" / "Collapse All" for quick navigation
-
-Data Management:
-- Conversations are automatically saved as students chat
-- Data is deleted when the activity is deleted
-- Data can be reset using course reset functionality
-- Included in course backup/restore (with user data)
-
-Privacy:
-- Only teachers can access conversation histories
-- Students cannot see other students' conversations
-- Complies with GDPR and privacy regulations
+1. Teacher creates MooChat with a system prompt (e.g., "You are Friar Tuck")
+2. Teacher enters learning objectives (e.g., "How many Merry Men are named?")
+3. Teacher writes a hint in the Description (e.g., "Tell me about the Merry Men")
+4. Students chat naturally — they never see the objectives
+5. After each AI reply, the system evaluates only that exchange
+6. If the specific fact required by an objective was explicitly stated,
+   the objective is awarded — max 1 per exchange
+7. The awarded objective appears in the student's sidebar with a notification
+8. Student must keep chatting to earn remaining objectives
+9. If student clears chat and starts over, it's a new session
+10. Only the best session score goes to the gradebook
 
 ==============================================================================
-SECTION CONTENT INTEGRATION
+CONVERSATION HISTORY (TEACHERS)
 ==============================================================================
 
-When "Include Section Content" is enabled, the AI has access to:
+Teachers with mod/moochat:viewhistory capability can:
+- View student list with best score and message count
+- Click "View Details" for full session-by-session breakdown
+- See which objectives each student met and when
+- See which session score is recorded in the gradebook
+- Sessions are collapsible for easy navigation
 
-- Pages (mod_page) - Full text content
-- Books (mod_book) - All chapters and content
-- Labels - Text displayed on course page
-- Assignments - Assignment descriptions
-- URLs - Link titles and descriptions
-- Glossary - All terms and definitions
+==============================================================================
+UPLOADED CONTENT (TEACHERS)
+==============================================================================
 
-This allows students to ask questions like:
-- "What are the main points from the reading?"
-- "Can you explain the assignment requirements?"
-- "Define the terms from the glossary"
-- "Summarize what we learned in this section"
+To restrict the AI to specific course materials:
+1. Edit the MooChat activity
+2. Open "Course Content for AI" section
+3. Upload PDF or .txt files (up to 5 files)
+4. Check "Only Use Uploaded Content"
+5. Save
 
-PRIVACY NOTE: Students can ask the AI about hidden content if the teacher 
-enables "Include Hidden Content". Use this feature carefully.
+The AI will now only answer from those files. If a student asks something
+not covered, the AI will say "I don't have information about that in the
+course materials."
+
+Leave the checkbox unchecked to use files as reference material while
+still allowing the AI to use general knowledge.
 
 ==============================================================================
 TROUBLESHOOTING
 ==============================================================================
 
-AI Not Responding:
-- Check that Moodle AI subsystem is configured
-- Verify at least one AI provider is enabled and working
-- Check PHP error logs for API connection issues
-- Ensure network allows connections to AI provider
+PDF Upload Fails / Times Out:
+- If nginx is in front of Apache, add client_max_body_size 10M; to your
+  nginx server block and reload nginx
+- Check /etc/php/8.1/fpm/php.ini for upload_max_filesize and post_max_size
+- Ensure max_execution_time is at least 300 in fpm/php.ini
 
-Rate Limit Not Working:
-- Verify rate limiting is enabled in activity settings
-- Check database table exists: [prefix]_moochat_usage
-- Students may need to wait until the time period expires
+AI Not Responding:
+- Check Moodle AI subsystem configuration
+- Verify at least one AI provider is enabled
+- Check PHP error logs for API connection issues
+
+Objectives Not Being Awarded:
+- Only 1 objective is awarded per chat exchange by design
+- The specific fact must be explicitly stated in the exchange
+- Check that grade > 0 is set in the activity settings
+- Try asking more specific questions that directly address the topic
+
+Grades Not Updating:
+- Grades only update when the new session score exceeds the previous best
+- Check Site Administration > Grades for gradebook configuration
+- Teachers can manually override grades in the gradebook
 
 Section Content Not Loading:
-- Verify "Include Section Content" is enabled
-- Check that content exists in the same section as MooChat
-- Review PHP error logs for database query issues
-
-Formatting Issues:
-- Clear Moodle cache: Site Administration > Development > Purge all caches
-- Clear browser cache and refresh page
-- Check that JavaScript is enabled in browser
-
-History Not Showing:
-- Verify conversations exist in database: [prefix]_moochat_conversations
-- Check that you have mod/moochat:viewhistory capability
-- Purge Moodle caches if recently upgraded
-- Check that web service is registered: mod_moochat_save_conversation
+- Verify Include Section Content is enabled
+- Check content exists in the same section as MooChat
+- Large sections may slow AI responses
 
 ==============================================================================
 DATABASE TABLES
 ==============================================================================
 
-This plugin creates three tables:
-
 [prefix]_moochat
-- Stores activity instances and configuration
+- Activity instances and all configuration settings
 
-[prefix]_moochat_usage  
-- Tracks student usage for rate limiting
-- Automatically cleaned every 7 days
+[prefix]_moochat_usage
+- Student usage tracking for rate limiting
+- Auto-cleaned after 7 days
 
 [prefix]_moochat_conversations
-- Stores complete conversation history (user and AI messages)
-- Deleted when activity is deleted or course is reset
+- Complete conversation history (all messages)
+- Includes sessionid for session-based tracking
+- Deleted on activity delete or course reset
 - Included in backup/restore with user data
+
+[prefix]_moochat_objective_results
+- Per-session objective results
+- Tracks which objectives were met in each session
+- Used to calculate best-session grade
+
+==============================================================================
+CHANGELOG SUMMARY
+==============================================================================
+
+v1.7.0 (2026-04-16) — Course content upload; Only Use Uploaded Content mode
+v1.6.0 (2026-04-16) — Session-based scoring; objectives revealed on discovery
+v1.5.0 (2026-02-28) — AI grading with learning objectives; gradebook integration
+v1.4.0 (2026-02-22) — PDF/PPTX support; personalized welcome message
+v1.3.0 (2026-02-18) — Conversation history tracking for teachers
+v1.2.5 (2025-11-13) — Rate limiting / message limit bug fixes
+v1.2.4 (2025-11-13) — JavaScript coding standards fixes
+v1.0.1 (2025-11-08) — Event implementation; privacy provider; Ajax upgrade
+v1.0.0 (2025-10-30) — Initial release
 
 ==============================================================================
 SUPPORT & DEVELOPMENT
@@ -282,58 +269,11 @@ SUPPORT & DEVELOPMENT
 Author: Brian A. Pool
 Organization: National Trail Local Schools
 
-For issues, feature requests, or contributions:
-- Report bugs via email to the author
-- Feature suggestions welcome
-- Contributions and improvements appreciated
-
 ==============================================================================
 LICENSE
 ==============================================================================
 
-This program is free software: you can redistribute it and/or modify it under 
-the terms of the GNU General Public License as published by the Free Software 
-Foundation, either version 3 of the License, or (at your option) any later 
-version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with 
-this program. If not, see <https://www.gnu.org/licenses/>.
-
-==============================================================================
-ACKNOWLEDGMENTS
-==============================================================================
-
-Special thanks to:
-- The Moodle community for ongoing support and inspiration
-- National Trail Local Schools for supporting innovative educational technology
-
-==============================================================================
-CHANGELOG
-==============================================================================
-
-Version 1.3.0 (2026-02-18)
-- Added conversation history tracking
-- Teachers can view complete student-AI conversation histories
-- New History page with collapsible date organization
-- Conversations automatically saved via web service
-- Proper backup/restore support for conversation data
-- Privacy-compliant data export and deletion
-- New capability: mod/moochat:viewhistory
-
-Version 1.0 (2025-10-30)
-- Initial release
-- Core chat functionality with AI integration
-- Display modes: inline and separate page
-- Section content integration
-- Rate limiting with server-side tracking
-- Avatar support with size options
-- Adjustable chat interface sizes
-- Message formatting for readability
-- Hidden content option for teachers
-- Auto-cleanup of usage data
+GNU General Public License v3 or later
+https://www.gnu.org/licenses/
 
 ==============================================================================

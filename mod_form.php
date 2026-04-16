@@ -5,31 +5,41 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Define all the restore steps that will be used by the restore_moochat_activity_task
+ * Activity settings form for mod_moochat
  *
  * @package    mod_moochat
- * @copyright  2025 Brian A. Pool
+ * @copyright  2026 Brian A. Pool
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/course/moodleform_mod.php');
+require_once($CFG->dirroot . '/course/moodleform_mod.php');
 
 class mod_moochat_mod_form extends moodleform_mod {
 
-    function definition() {
+    public function definition() {
         global $CFG;
-        
+
         $mform = $this->_form;
 
-        // General section
+        // ---------------------------------------------------------------
+        // General section.
+        // ---------------------------------------------------------------
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        // Activity name
-        $mform->addElement('text', 'name', get_string('chatname', 'moochat'), array('size' => '64'));
+        // Activity name.
+        $mform->addElement('text', 'name', get_string('chatname', 'moochat'), ['size' => '64']);
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
         } else {
@@ -37,174 +47,174 @@ class mod_moochat_mod_form extends moodleform_mod {
         }
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-        
-        // Introduction
+
+        // Introduction.
         $this->standard_intro_elements();
 
-	// Display mode
-        $displayoptions = array(
-            0 => get_string('display_page', 'moochat'),
+        // Display mode.
+        $displayoptions = [
+            0 => get_string('display_page',   'moochat'),
             1 => get_string('display_inline', 'moochat'),
-        );
-
+        ];
         $mform->addElement('select', 'display', get_string('display', 'moochat'), $displayoptions);
         $mform->addHelpButton('display', 'display', 'moochat');
         $mform->setDefault('display', 0);
 
-        // Chat size
-        $sizeoptions = array(
-            'small' => get_string('chatsize_small', 'moochat'),
+        // Chat size.
+        $sizeoptions = [
+            'small'  => get_string('chatsize_small',  'moochat'),
             'medium' => get_string('chatsize_medium', 'moochat'),
-            'large' => get_string('chatsize_large', 'moochat'),
-        );
+            'large'  => get_string('chatsize_large',  'moochat'),
+        ];
         $mform->addElement('select', 'chatsize', get_string('chatsize', 'moochat'), $sizeoptions);
         $mform->addHelpButton('chatsize', 'chatsize', 'moochat');
         $mform->setDefault('chatsize', 'medium');
 
-        
-	// Include section content
-        $mform->addElement('advcheckbox', 'include_section_content', 
-                          get_string('include_section_content', 'moochat'));
+        // Include section content.
+        $mform->addElement('advcheckbox', 'include_section_content', get_string('include_section_content', 'moochat'));
         $mform->addHelpButton('include_section_content', 'include_section_content', 'moochat');
         $mform->setDefault('include_section_content', 0);
 
-        // Warning about section content
-        $warninghtml = '<div class="alert alert-warning">' .
-                       get_string('include_section_content_warning', 'moochat') .
-                       '</div>';
+        $warninghtml = '<div class="alert alert-warning">' . get_string('include_section_content_warning', 'moochat') . '</div>';
         $mform->addElement('static', 'include_section_content_warning', '', $warninghtml);
         $mform->hideIf('include_section_content_warning', 'include_section_content');
 
-        // Include hidden content (only shows if section content is enabled)
-        $mform->addElement('advcheckbox', 'include_hidden_content', 
-                          get_string('include_hidden_content', 'moochat'));
+        // Include hidden content.
+        $mform->addElement('advcheckbox', 'include_hidden_content', get_string('include_hidden_content', 'moochat'));
         $mform->addHelpButton('include_hidden_content', 'include_hidden_content', 'moochat');
         $mform->setDefault('include_hidden_content', 0);
         $mform->hideIf('include_hidden_content', 'include_section_content');
 
-        // Avatar Image Upload
-        $mform->addElement('filemanager', 'avatar', 
-                          get_string('avatar', 'moochat'),
-                          null,
-                          array('subdirs' => 0, 'maxfiles' => 1, 
-                                'accepted_types' => array('image')));
+        // Avatar Image Upload.
+        $mform->addElement('filemanager', 'avatar', get_string('avatar', 'moochat'), null,
+            ['subdirs' => 0, 'maxfiles' => 1, 'accepted_types' => ['image']]);
         $mform->addHelpButton('avatar', 'avatar', 'moochat');
-        
-        // Avatar Size Selection
-        $sizes = array(
-            '48' => 'Small (48x48)',
-            '64' => 'Medium (64x64)',
-            '96' => 'Large (96x96)',
-            '128' => 'Extra Large (128x128)',
-        );
-        $mform->addElement('select', 'avatarsize', 
-                          get_string('avatarsize', 'moochat'), 
-                          $sizes);
+
+        // Avatar Size.
+        $sizes = ['48' => 'Small (48x48)', '64' => 'Medium (64x64)', '96' => 'Large (96x96)', '128' => 'Extra Large (128x128)'];
+        $mform->addElement('select', 'avatarsize', get_string('avatarsize', 'moochat'), $sizes);
         $mform->setDefault('avatarsize', '64');
         $mform->addHelpButton('avatarsize', 'avatarsize', 'moochat');
 
-        // System Prompt (AI Personality)
-        $mform->addElement('textarea', 'systemprompt', 
-                          get_string('systemprompt', 'moochat'),
-                          array('rows' => 5, 'cols' => 60));
+        // System Prompt.
+        $mform->addElement('textarea', 'systemprompt', get_string('systemprompt', 'moochat'), ['rows' => 5, 'cols' => 60]);
         $mform->setType('systemprompt', PARAM_TEXT);
         $mform->addHelpButton('systemprompt', 'systemprompt', 'moochat');
         $mform->setDefault('systemprompt', get_string('defaultprompt', 'moochat'));
 
-        // Rate Limiting Header
+        // ---------------------------------------------------------------
+        // Course Content for AI section.
+        // ---------------------------------------------------------------
+        $mform->addElement('header', 'contentheader', get_string('contentheader', 'moochat'));
+        $mform->setExpanded('contentheader', true);
+
+        // File upload — same options as avatar but allow 5 files and any type
+        // (type filtering caused upload hangs on some servers).
+        $mform->addElement('filemanager', 'contentfiles', get_string('contentfiles', 'moochat'), null,
+            ['subdirs' => 0, 'maxfiles' => 5, 'accepted_types' => '*']);
+        $mform->addHelpButton('contentfiles', 'contentfiles', 'moochat');
+
+        // Only use uploaded content checkbox.
+        $mform->addElement('advcheckbox', 'content_restrict', get_string('content_restrict', 'moochat'));
+        $mform->addHelpButton('content_restrict', 'content_restrict', 'moochat');
+        $mform->setDefault('content_restrict', 0);
+
+        // ---------------------------------------------------------------
+        // Learning Objectives & Grading section.
+        // ---------------------------------------------------------------
+        $mform->addElement('header', 'objectivesheader', get_string('objectivesheader', 'moochat'));
+        $mform->setExpanded('objectivesheader', true);
+
+        $mform->addElement('textarea', 'objectives', get_string('objectives', 'moochat'), ['rows' => 8, 'cols' => 60]);
+        $mform->setType('objectives', PARAM_TEXT);
+        $mform->addHelpButton('objectives', 'objectives', 'moochat');
+        $mform->setDefault('objectives', '');
+
+        $hinthtml = '<div class="alert alert-info">' . get_string('objectiveshint', 'moochat') . '</div>';
+        $mform->addElement('static', 'objectiveshint', '', $hinthtml);
+
+        $this->standard_grading_coursemodule_elements();
+
+        // ---------------------------------------------------------------
+        // Rate Limiting section.
+        // ---------------------------------------------------------------
         $mform->addElement('header', 'ratelimitheader', get_string('ratelimiting', 'moochat'));
 
-        // Enable Rate Limiting
-        $mform->addElement('advcheckbox', 'ratelimit_enable', 
-                          get_string('ratelimit_enable', 'moochat'));
+        $mform->addElement('advcheckbox', 'ratelimit_enable', get_string('ratelimit_enable', 'moochat'));
         $mform->addHelpButton('ratelimit_enable', 'ratelimit_enable', 'moochat');
         $mform->setDefault('ratelimit_enable', 0);
 
-        // Rate Limit Period
-        $periods = array(
-            'hour' => get_string('period_hour', 'moochat'),
-            'day' => get_string('period_day', 'moochat'),
-        );
-        $mform->addElement('select', 'ratelimit_period', 
-                          get_string('ratelimit_period', 'moochat'), 
-                          $periods);
+        $periods = ['hour' => get_string('period_hour', 'moochat'), 'day' => get_string('period_day', 'moochat')];
+        $mform->addElement('select', 'ratelimit_period', get_string('ratelimit_period', 'moochat'), $periods);
         $mform->setDefault('ratelimit_period', 'day');
         $mform->addHelpButton('ratelimit_period', 'ratelimit_period', 'moochat');
         $mform->hideIf('ratelimit_period', 'ratelimit_enable');
 
-        // Rate Limit Count
-        $mform->addElement('text', 'ratelimit_count', 
-                          get_string('ratelimit_count', 'moochat'));
+        $mform->addElement('text', 'ratelimit_count', get_string('ratelimit_count', 'moochat'));
         $mform->setType('ratelimit_count', PARAM_INT);
         $mform->setDefault('ratelimit_count', 10);
         $mform->addHelpButton('ratelimit_count', 'ratelimit_count', 'moochat');
         $mform->hideIf('ratelimit_count', 'ratelimit_enable');
 
-        // Advanced Settings Header
+        // ---------------------------------------------------------------
+        // Advanced Settings section.
+        // ---------------------------------------------------------------
         $mform->addElement('header', 'advancedheader', get_string('advancedsettings', 'moochat'));
         $mform->setExpanded('advancedheader', false);
 
-        // Max Messages
-        $mform->addElement('text', 'maxmessages', 
-                          get_string('maxmessages', 'moochat'));
+        $mform->addElement('text', 'maxmessages', get_string('maxmessages', 'moochat'));
         $mform->setType('maxmessages', PARAM_INT);
         $mform->setDefault('maxmessages', 20);
         $mform->addHelpButton('maxmessages', 'maxmessages', 'moochat');
 
-        // Temperature (Creativity)
-        $temperatures = array(
+        $temperatures = [
             '0.1' => '0.1 - Very Focused',
             '0.3' => '0.3 - Focused',
             '0.5' => '0.5 - Balanced',
             '0.7' => '0.7 - Creative',
             '0.9' => '0.9 - Very Creative',
-        );
-        $mform->addElement('select', 'temperature', 
-                          get_string('temperature', 'moochat'), 
-                          $temperatures);
+        ];
+        $mform->addElement('select', 'temperature', get_string('temperature', 'moochat'), $temperatures);
         $mform->setDefault('temperature', '0.7');
         $mform->addHelpButton('temperature', 'temperature', 'moochat');
 
-        /* Model Selection
-        $models = array(
-            'tinyllama:latest' => 'TinyLlama (Fastest, 1.1B)',
-            'llama3.2:latest' => 'Llama 3.2 (Fast, 3.2B)',
-            'llama2:latest' => 'Llama 2 (Balanced, 7B)',
-            'gemma2:latest' => 'Gemma 2 (Quality, 9.2B)',
-        );
-        $mform->addElement('select', 'model', 
-                          get_string('modelselection', 'moochat'), 
-                          $models);
-        $mform->setDefault('model', 'gemma2:latest');
-        $mform->addHelpButton('model', 'modelselection', 'moochat');*/
-
-        // Standard coursemodule elements
         $this->standard_coursemodule_elements();
-
-        // Buttons
         $this->add_action_buttons();
     }
-    
-    function data_preprocessing(&$default_values) {
+
+    public function data_preprocessing(&$default_values) {
         parent::data_preprocessing($default_values);
-        
-        // Prepare file manager for avatar
+
+        // Prepare file manager for avatar.
         if ($this->current->instance) {
             $draftitemid = file_get_submitted_draft_itemid('avatar');
-            file_prepare_draft_area($draftitemid, $this->context->id, 'mod_moochat', 
-                                    'avatar', 0, array('subdirs' => false, 'maxfiles' => 1));
+            file_prepare_draft_area($draftitemid, $this->context->id, 'mod_moochat',
+                'avatar', 0, ['subdirs' => false, 'maxfiles' => 1]);
             $default_values['avatar'] = $draftitemid;
         }
+
+        // Prepare file manager for content files.
+        if ($this->current->instance) {
+            $draftitemid = file_get_submitted_draft_itemid('contentfiles');
+            file_prepare_draft_area($draftitemid, $this->context->id, 'mod_moochat',
+                'contentfiles', 0, ['subdirs' => false, 'maxfiles' => 5]);
+            $default_values['contentfiles'] = $draftitemid;
+        }
     }
-    
-    function data_postprocessing($data) {
+
+    public function data_postprocessing($data) {
         parent::data_postprocessing($data);
-        
-        // Handle avatar file upload
+
+        // Handle avatar file upload.
         if (!empty($data->avatar)) {
-            $draftitemid = $data->avatar;
-            file_save_draft_area_files($draftitemid, $this->context->id, 'mod_moochat', 
-                                      'avatar', 0, array('subdirs' => false, 'maxfiles' => 1));
+            file_save_draft_area_files($data->avatar, $this->context->id, 'mod_moochat',
+                'avatar', 0, ['subdirs' => false, 'maxfiles' => 1]);
+        }
+
+        // Handle content files upload.
+        if (!empty($data->contentfiles)) {
+            file_save_draft_area_files($data->contentfiles, $this->context->id, 'mod_moochat',
+                'contentfiles', 0, ['subdirs' => false, 'maxfiles' => 5]);
         }
     }
 }

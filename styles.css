@@ -345,3 +345,149 @@
         font-size: 12px;
     }
 }
+
+/* =========================================================
+   MooChat – Learning Objectives & Grading styles (v1.5.0)
+   ========================================================= */
+
+/* Objectives wrapper in sidebar */
+.moochat-objectives-wrapper {
+    margin-top: 1rem;
+}
+
+.moochat-objectives-panel {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: .75rem;
+    font-size: .875rem;
+}
+
+.moochat-objectives-heading {
+    font-size: .95rem;
+    margin-bottom: .5rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    flex-wrap: wrap;
+}
+
+.moochat-objectives-title {
+    font-weight: 600;
+}
+
+.moochat-objectives-badge {
+    font-size: .75rem;
+}
+
+.moochat-progress {
+    height: 10px;
+    border-radius: 5px;
+}
+
+.moochat-grade-display {
+    color: #495057;
+}
+
+/* Objective list items */
+.moochat-objectives-list {
+    margin-top: .4rem;
+}
+
+.moochat-objective-item {
+    padding: .2rem 0;
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: .35rem;
+}
+
+.moochat-obj-icon {
+    flex-shrink: 0;
+    width: 1.1em;
+    text-align: center;
+}
+
+.moochat-obj-met {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.moochat-obj-unmet {
+    color: #6c757d;
+}
+
+/* Teacher history page – objectives table */
+.moochat-teacher-objectives {
+    margin-bottom: 1.5rem;
+}
+
+.moochat-objectives-table td,
+.moochat-objectives-table th {
+    vertical-align: middle;
+}
+
+/* ---- Session-based objectives (v1.6) ---- */
+
+.moochat-score-display {
+    background: #f0f7f0;
+    border: 1px solid #c3e6cb;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    font-size: 1em;
+}
+.moochat-score-label {
+    color: #666;
+}
+.moochat-score-value {
+    color: #155724;
+    font-size: 1.1em;
+}
+.moochat-bestscore {
+    font-size: 0.8em;
+}
+
+.moochat-objectives-progress {
+    margin-bottom: 8px;
+}
+.moochat-progress-label {
+    margin-bottom: 4px;
+}
+
+.moochat-objectives-hint {
+    font-style: italic;
+    color: #888;
+    margin-top: 6px;
+}
+
+/* Newly-met objective highlight animation */
+@keyframes moochat-newobj-flash {
+    0%   { background-color: #fff3cd; transform: scale(1.02); }
+    50%  { background-color: #d4edda; }
+    100% { background-color: transparent; transform: scale(1); }
+}
+.moochat-obj-newlymet {
+    animation: moochat-newobj-flash 1.5s ease-in-out;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+.moochat-new-badge {
+    font-size: 0.7em;
+    vertical-align: middle;
+}
+
+/* In-chat objective toast */
+.moochat-objective-toast {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 8px 0;
+    font-size: 0.9em;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+}
+.moochat-toast-fadein  { opacity: 1; }
+.moochat-toast-fadeout { opacity: 0; transition: opacity 1s ease; }

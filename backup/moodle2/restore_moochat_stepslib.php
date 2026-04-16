@@ -60,13 +60,21 @@ class restore_moochat_activity_structure_step extends restore_activity_structure
         $data->course       = $this->get_courseid();
         $data->timecreated  = $this->apply_date_offset($data->timecreated);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
-        // Ensure new fields have defaults if restoring from older backup.
+
+        // Ensure new fields have safe defaults if restoring from older backup.
         if (!isset($data->grade)) {
             $data->grade = 0;
         }
         if (!isset($data->objectives)) {
             $data->objectives = '';
         }
+        if (!isset($data->pointsperobj)) {
+            $data->pointsperobj = 1;
+        }
+        if (!isset($data->content_restrict)) {
+            $data->content_restrict = 0;
+        }
+
         $newitemid = $DB->insert_record('moochat', $data);
         $this->apply_activity_instance($newitemid);
     }
@@ -78,13 +86,13 @@ class restore_moochat_activity_structure_step extends restore_activity_structure
      */
     protected function process_moochat_usage($data) {
         global $DB;
-        $data         = (object)$data;
-        $oldid        = $data->id;
+        $data                = (object)$data;
+        $oldid               = $data->id;
         $data->moochatid     = $this->get_new_parentid('moochat');
         $data->userid        = $this->get_mappingid('user', $data->userid);
         $data->firstmessage  = $this->apply_date_offset($data->firstmessage);
         $data->lastmessage   = $this->apply_date_offset($data->lastmessage);
-        $newitemid    = $DB->insert_record('moochat_usage', $data);
+        $newitemid           = $DB->insert_record('moochat_usage', $data);
         $this->set_mapping('moochat_usage', $oldid, $newitemid);
     }
 
@@ -95,12 +103,18 @@ class restore_moochat_activity_structure_step extends restore_activity_structure
      */
     protected function process_moochat_conversation($data) {
         global $DB;
-        $data         = (object)$data;
-        $oldid        = $data->id;
+        $data              = (object)$data;
+        $oldid             = $data->id;
         $data->moochatid   = $this->get_new_parentid('moochat');
         $data->userid      = $this->get_mappingid('user', $data->userid);
         $data->timecreated = $this->apply_date_offset($data->timecreated);
-        $newitemid    = $DB->insert_record('moochat_conversations', $data);
+
+        // sessionid is NOTNULL — provide empty string if restoring from older backup.
+        if (!isset($data->sessionid)) {
+            $data->sessionid = '';
+        }
+
+        $newitemid = $DB->insert_record('moochat_conversations', $data);
         $this->set_mapping('moochat_conversation', $oldid, $newitemid);
     }
 
@@ -111,20 +125,27 @@ class restore_moochat_activity_structure_step extends restore_activity_structure
      */
     protected function process_moochat_objectiveresult($data) {
         global $DB;
-        $data         = (object)$data;
-        $oldid        = $data->id;
+        $data                 = (object)$data;
+        $oldid                = $data->id;
         $data->moochatid      = $this->get_new_parentid('moochat');
         $data->userid         = $this->get_mappingid('user', $data->userid);
         $data->timechecked    = $this->apply_date_offset($data->timechecked);
-        $newitemid    = $DB->insert_record('moochat_objective_results', $data);
+
+        // sessionid is NOTNULL — provide empty string if restoring from older backup.
+        if (!isset($data->sessionid)) {
+            $data->sessionid = '';
+        }
+
+        $newitemid = $DB->insert_record('moochat_objective_results', $data);
         $this->set_mapping('moochat_objectiveresult', $oldid, $newitemid);
     }
 
     /**
-     * Post-execution actions.
+     * Post-execution actions — restore all file areas.
      */
     protected function after_execute() {
-        $this->add_related_files('mod_moochat', 'intro',  null);
-        $this->add_related_files('mod_moochat', 'avatar', null);
+        $this->add_related_files('mod_moochat', 'intro',        null);
+        $this->add_related_files('mod_moochat', 'avatar',       null);
+        $this->add_related_files('mod_moochat', 'contentfiles', null);
     }
 }

@@ -26,6 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_moochat';
 $plugin->requires  = 2024042200; // Moodle 4.4+
-$plugin->version   = 2026060400; // Added uploaded content restriction
+$plugin->version   = 2026041601; // Added uploaded content restriction
 $plugin->maturity  = MATURITY_BETA;
-$plugin->release   = 'v1.7.0';
+$plugin->release   = 'v1.7.1';

@@ -34,32 +34,32 @@ class backup_moochat_activity_structure_step extends backup_activity_structure_s
     protected function define_structure() {
         $userinfo = $this->get_setting_value('userinfo');
 
-        // Root element.
+        // Root element — includes all moochat table fields.
         $moochat = new backup_nested_element('moochat', ['id'], [
             'name', 'intro', 'introformat', 'timecreated', 'timemodified',
             'display', 'chatsize', 'systemprompt', 'avatarurl', 'avatarsize',
             'include_section_content', 'include_hidden_content',
             'ratelimit_enable', 'ratelimit_period', 'ratelimit_count',
             'maxmessages', 'temperature', 'model',
-            'grade', 'objectives',
+            'grade', 'objectives', 'pointsperobj', 'content_restrict',
         ]);
 
         // Usage data.
-        $usages  = new backup_nested_element('usages');
-        $usage   = new backup_nested_element('usage', ['id'], [
+        $usages = new backup_nested_element('usages');
+        $usage  = new backup_nested_element('usage', ['id'], [
             'userid', 'messagecount', 'firstmessage', 'lastmessage',
         ]);
 
-        // Conversation data.
+        // Conversation data — includes sessionid for session-based scoring.
         $conversations = new backup_nested_element('conversations');
         $conversation  = new backup_nested_element('conversation', ['id'], [
-            'userid', 'role', 'message', 'timecreated',
+            'userid', 'sessionid', 'role', 'message', 'timecreated',
         ]);
 
-        // Objective results data.
+        // Objective results — includes sessionid for session-based scoring.
         $objectiveresults = new backup_nested_element('objectiveresults');
         $objectiveresult  = new backup_nested_element('objectiveresult', ['id'], [
-            'userid', 'objectiveindex', 'met', 'timechecked',
+            'userid', 'sessionid', 'objectiveindex', 'met', 'timechecked',
         ]);
 
         // Build the tree.
@@ -89,9 +89,10 @@ class backup_moochat_activity_structure_step extends backup_activity_structure_s
         $conversation->annotate_ids('user', 'userid');
         $objectiveresult->annotate_ids('user', 'userid');
 
-        // File annotations.
-        $moochat->annotate_files('mod_moochat', 'intro',  null);
-        $moochat->annotate_files('mod_moochat', 'avatar', null);
+        // File annotations — includes contentfiles file area.
+        $moochat->annotate_files('mod_moochat', 'intro',        null);
+        $moochat->annotate_files('mod_moochat', 'avatar',       null);
+        $moochat->annotate_files('mod_moochat', 'contentfiles', null);
 
         return $this->prepare_activity_structure($moochat);
     }

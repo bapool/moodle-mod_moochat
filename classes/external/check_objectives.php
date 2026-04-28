@@ -164,14 +164,15 @@ class check_objectives extends external_api {
             "UNMET OBJECTIVES:\n" . $unmetList . "\n" .
             "TASK: Identify at most ONE objective that was clearly satisfied by this exchange.\n\n" .
             "RULES:\n" .
-            "- The specific fact required by the objective must be EXPLICITLY STATED in the exchange.\n" .
+            "- The objective is met ONLY if the specific answer required by the objective appears in the exchange.\n" .
+            "- The topic being mentioned is NOT enough. The actual specific answer must be present.\n" .
+            "- Example: objective 'What is the weather in France' requires weather information to appear. A message only mentioning France's location does NOT satisfy it.\n" .
             "- A general answer about the topic does NOT satisfy an objective about a specific detail.\n" .
             "- If multiple could qualify, pick only the SINGLE BEST match.\n" .
             "- If NONE were clearly satisfied, return NONE.\n\n" .
             "Respond in exactly this format:\n" .
             "EVIDENCE: [copy the exact sentence from the exchange proving the objective, or NONE]\n" .
             "INDEX: [the index number in brackets, or NONE]";
-
         try {
             $manager  = \core\di::get(\core_ai\manager::class);
             $action   = new \core_ai\aiactions\generate_text(
@@ -201,13 +202,31 @@ class check_objectives extends external_api {
                 }
             }
 
-            // Only award if evidence is real and index is in our unmet list.
+            // Only award if evidence is real, index is in our unmet list,
+            // AND at least one meaningful word from the objective appears in the exchange.
             $newlymet = [];
+            $keywordFound = false;
+            if ($matchIdx !== null && isset($unmetObjectives[$matchIdx])) {
+                $objectiveWords = preg_split('/\s+/', strtolower($unmetObjectives[$matchIdx]));
+                $stopwords = ['a','an','the','is','in','of','to','for','and','or','what','when','where','who','how','why'];
+                $exchangeLower = strtolower($exchange);
+                $matchCount = 0;
+                foreach ($objectiveWords as $word) {
+                    $word = trim($word, '.,?!');
+                    if (strlen($word) > 3 && !in_array($word, $stopwords)) {
+                        if (strpos($exchangeLower, $word) !== false) {
+                            $matchCount++;
+                        }
+                    }
+                }
+                $keywordFound = ($matchCount >= 2);
+            }
             if (
                 $matchIdx !== null &&
                 isset($unmetObjectives[$matchIdx]) &&
                 strtoupper($evidence) !== 'NONE' &&
-                $evidence !== ''
+                $evidence !== '' &&
+                $keywordFound
             ) {
                 $now      = time();
                 $existing = $DB->get_record('moochat_objective_results', [
@@ -244,8 +263,18 @@ class check_objectives extends external_api {
                 ]);
                 $sessiongrade = round(($sessionmet / $total) * $moochat->grade, 2);
                 $bestscore    = self::get_best_score($moochat, $USER->id, $total);
-                if ($sessiongrade > $bestscore) {
+                if ($sessiongrade >= $bestscore) {
                     moochat_update_grade($moochat, $USER->id, $sessiongrade);
+                    $course     = $DB->get_record('course', ['id' => $moochat->course], '*', MUST_EXIST);
+                    $completion = new \completion_info($course);
+                    if ($completion->is_enabled($cm)) {
+                        $completion->update_state($cm, COMPLETION_COMPLETE, $USER->id);
+                    }
+                }
+                // Trigger pass-grade completion regardless of whether this is a new best score.
+                $completion = new \completion_info($DB->get_record('course', ['id' => $moochat->course], '*', MUST_EXIST));
+                if ($completion->is_enabled($cm)) {
+                    $completion->update_state($cm, COMPLETION_COMPLETE, $USER->id);
                 }
             }
 

@@ -79,7 +79,7 @@ class send_message extends external_api {
             $usage = $DB->get_record('moochat_usage',
                 ['moochatid' => $moochatid, 'userid' => $USER->id]);
 
-            $now           = time();
+            $now = time();
             $periodseconds = ($ratelimitperiod === 'hour') ? 3600 : 86400;
 
             if ($usage) {
@@ -135,38 +135,26 @@ class send_message extends external_api {
 
         // ------------------------------------------------------------------
         // Uploaded content files — extract text and inject into prompt.
-        //
-        // If content_restrict is checked: the AI may ONLY use the uploaded
-        // content and must decline questions not covered by it.
-        //
-        // If files are uploaded but restrict is unchecked: the content is
-        // provided as reference material alongside the AI's general knowledge.
-        //
-        // If no files are uploaded: fall through to section content / nothing.
         // ------------------------------------------------------------------
         $uploadedcontent = moochat_get_uploaded_content($context->id, $moochat);
 
         if (!empty($uploadedcontent)) {
             if (!empty($moochat->content_restrict)) {
-    // Strict mode — AI may only answer from uploaded content.
-    // Instruction appears before AND after content so model sees it last.
-    $systemprompt .=
-        "\n\nCRITICAL RULE: You may ONLY use the course content between the markers below. " .
-        "Do NOT use any outside knowledge, training data, or general information. " .
-        "If the answer is not explicitly stated in the course content, respond with: " .
-        "'I don't have information about that in the course materials.' " .
-        "Do not guess. Do not supplement. Only use what is written below.\n\n" .
-        "=== COURSE CONTENT BEGIN ===\n" . $uploadedcontent . "\n=== COURSE CONTENT END ===\n\n" .
-        "REMINDER: Answer ONLY from the course content above. No outside knowledge.";
+                $systemprompt .=
+                    "\n\nCRITICAL RULE: You may ONLY use the course content between the markers below. " .
+                    "Do NOT use any outside knowledge, training data, or general information. " .
+                    "If the answer is not explicitly stated in the course content, respond with: " .
+                    "'I don't have information about that in the course materials.' " .
+                    "Do not guess. Do not supplement. Only use what is written below.\n\n" .
+                    "=== COURSE CONTENT BEGIN ===\n" . $uploadedcontent . "\n=== COURSE CONTENT END ===\n\n" .
+                    "REMINDER: Answer ONLY from the course content above. No outside knowledge.";
             } else {
-                // Reference mode — uploaded content provided as helpful context.
                 $systemprompt .=
                     "\n\nThe following course content has been provided as reference material. " .
                     "Use it to give accurate, course-specific answers when relevant.\n\n" .
                     "=== COURSE CONTENT ===\n" . $uploadedcontent . "\n=== END COURSE CONTENT ===";
             }
         } else if ($moochat->include_section_content) {
-            // No uploaded files — fall back to section content if enabled.
             $section       = $DB->get_record('course_sections', ['id' => $cm->section]);
             $sectionnum    = $section ? $section->section : 0;
             $includehidden = isset($moochat->include_hidden_content) ? $moochat->include_hidden_content : 0;
@@ -199,13 +187,45 @@ class send_message extends external_api {
             if ($response->get_success()) {
                 $reply = $response->get_response_data()['generatedcontent'] ?? '';
 
+                // Update usage counter (handles both rate-limited and non-rate-limited cases).
                 if ($ratelimitenabled && isset($usage)) {
                     $usage->messagecount++;
                     $usage->lastmessage = time();
                     $DB->update_record('moochat_usage', $usage);
                     $remaining = $ratelimitcount - $usage->messagecount;
+                    $messagecount = $usage->messagecount;
                 } else {
+                    // Not rate-limited — still need to track message count for completion.
+                    $usage = $DB->get_record('moochat_usage',
+                        ['moochatid' => $moochatid, 'userid' => $USER->id]);
+                    if ($usage) {
+                        $usage->messagecount++;
+                        $usage->lastmessage = time();
+                        $DB->update_record('moochat_usage', $usage);
+                        $messagecount = $usage->messagecount;
+                    } else {
+                        $now             = time();
+                        $usage           = new \stdClass();
+                        $usage->moochatid    = $moochatid;
+                        $usage->userid       = $USER->id;
+                        $usage->messagecount = 1;
+                        $usage->firstmessage = $now;
+                        $usage->lastmessage  = $now;
+                        $DB->insert_record('moochat_usage', $usage);
+                        $messagecount = 1;
+                    }
                     $remaining = -1;
+                }
+
+                // Trigger activity completion if the message threshold has been reached.
+                if (!empty($moochat->completionmessages) && $moochat->completionmessages > 0) {
+                    if ($messagecount >= (int) $moochat->completionmessages) {
+                        $course     = $DB->get_record('course', ['id' => $moochat->course], '*', MUST_EXIST);
+                        $completion = new \completion_info($course);
+                        if ($completion->is_enabled($cm)) {
+                            $completion->update_state($cm, COMPLETION_COMPLETE, $USER->id);
+                        }
+                    }
                 }
 
                 return [

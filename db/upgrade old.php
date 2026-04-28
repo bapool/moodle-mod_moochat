@@ -51,9 +51,9 @@ function xmldb_moochat_upgrade($oldversion) {
     }
 
     // -----------------------------------------------------------------
-    // 2026041600 - Add grading (grade, objectives) and objective results.
+    // 2026060200 - Add grading (grade, objectives) and objective results.
     // -----------------------------------------------------------------
-    if ($oldversion < 2026041600) {
+    if ($oldversion < 2026060200) {
 
         $table = new xmldb_table('moochat');
         $field = new xmldb_field('grade', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'model');
@@ -82,13 +82,13 @@ function xmldb_moochat_upgrade($oldversion) {
             $dbman->create_table($ortable);
         }
 
-        upgrade_mod_savepoint(true, 2026041600, 'moochat');
+        upgrade_mod_savepoint(true, 2026060200, 'moochat');
     }
 
     // -----------------------------------------------------------------
-    // 2026041601 - Add sessionid to conversations and objective_results.
+    // 2026060300 - Add sessionid to conversations and objective_results.
     // -----------------------------------------------------------------
-    if ($oldversion < 2026041601) {
+    if ($oldversion < 2026060300) {
 
         $table = new xmldb_table('moochat_conversations');
         $field = new xmldb_field('sessionid', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, '', 'userid');
@@ -119,15 +119,13 @@ function xmldb_moochat_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        upgrade_mod_savepoint(true, 2026041601, 'moochat');
+        upgrade_mod_savepoint(true, 2026060300, 'moochat');
     }
 
     // -----------------------------------------------------------------
-    // 2026041602 - Add content_restrict field.
-    //              Allows teacher to upload PDF/text files and restrict
-    //              the AI to only answer from that content.
+    // 2026060400 - Add content_restrict field.
     // -----------------------------------------------------------------
-    if ($oldversion < 2026041602) {
+    if ($oldversion < 2026060400) {
 
         $table = new xmldb_table('moochat');
         $field = new xmldb_field('content_restrict', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'pointsperobj');
@@ -135,15 +133,15 @@ function xmldb_moochat_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        upgrade_mod_savepoint(true, 2026041602, 'moochat');
+        upgrade_mod_savepoint(true, 2026060400, 'moochat');
     }
-    
+
     // -----------------------------------------------------------------
-    // 2026041603 - Add completionmessages field.
+    // 2026042701 - Add completionmessages field.
     //              Stores the minimum number of student messages required
     //              for the activity to be marked complete (0 = disabled).
     // -----------------------------------------------------------------
-    if ($oldversion < 2026041603) {
+    if ($oldversion < 2026042701) {
 
         $table = new xmldb_table('moochat');
         $field = new xmldb_field('completionmessages', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'content_restrict');
@@ -151,10 +149,8 @@ function xmldb_moochat_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        upgrade_mod_savepoint(true, 2026041603, 'moochat');
+        upgrade_mod_savepoint(true, 2026042701, 'moochat');
     }
-
-    return true;
 
     return true;
 }

@@ -97,10 +97,9 @@ class mod_moochat_mod_form extends moodleform_mod {
         $mform->addHelpButton('avatarsize', 'avatarsize', 'moochat');
 
         // System Prompt.
-        $mform->addElement('textarea', 'systemprompt', get_string('systemprompt', 'moochat'), ['rows' => 5, 'cols' => 60]);
-        $mform->setType('systemprompt', PARAM_TEXT);
-        $mform->addHelpButton('systemprompt', 'systemprompt', 'moochat');
-        $mform->setDefault('systemprompt', get_string('defaultprompt', 'moochat'));
+        $mform->addElement('editor', 'systemprompt_editor', get_string('systemprompt', 'moochat'), ['rows' => 10], ['maxfiles' => 0]);
+        $mform->setType('systemprompt_editor', PARAM_RAW);
+        $mform->addHelpButton('systemprompt_editor', 'systemprompt', 'moochat');
 
         // ---------------------------------------------------------------
         // Course Content for AI section.
@@ -134,6 +133,7 @@ class mod_moochat_mod_form extends moodleform_mod {
         $mform->addElement('static', 'objectiveshint', '', $hinthtml);
 
         $this->standard_grading_coursemodule_elements();
+        $mform->setDefault('grade[modgrade_type]', 'none');
 
         // ---------------------------------------------------------------
         // Rate Limiting section.
@@ -178,12 +178,90 @@ class mod_moochat_mod_form extends moodleform_mod {
         $mform->setDefault('temperature', '0.7');
         $mform->addHelpButton('temperature', 'temperature', 'moochat');
 
+        // ---------------------------------------------------------------
+        // Completion rules — must come before standard_coursemodule_elements().
+        // ---------------------------------------------------------------
         $this->standard_coursemodule_elements();
         $this->add_action_buttons();
     }
 
+    /**
+     * Add custom completion rules.
+     *
+     * Called automatically by standard_coursemodule_elements().
+     *
+     * @return array Element names added (used by Moodle to show/hide them).
+     */
+    public function add_completion_rules() {
+        $mform  = $this->_form;
+        $suffix = $this->get_suffix();
+
+        // Minimum interactions rule.
+        $group = [];
+        $completionmessagesel = 'completionmessages' . $suffix;
+        $group[] = $mform->createElement(
+            'advcheckbox',
+            $completionmessagesel,
+            '',
+            get_string('completionmessages', 'moochat')
+        );
+        $completionmessagescountel = 'completionmessagescount' . $suffix;
+        $group[] = $mform->createElement(
+            'text',
+            $completionmessagescountel,
+            '',
+            ['size' => 3]
+        );
+        $group[] = $mform->createElement(
+            'static',
+            'completionmessageslabel' . $suffix,
+            '',
+            get_string('completionmessages_label', 'moochat')
+        );
+
+        $groupname = 'completionmessagesgroup' . $suffix;
+        $mform->addGroup($group, $groupname, get_string('completionmessages', 'moochat'), ' ', false);
+        $mform->setType($completionmessagescountel, PARAM_INT);
+        $mform->setDefault($completionmessagescountel, 5);
+        $mform->hideIf($completionmessagescountel, $completionmessagesel);
+        $mform->disabledIf($completionmessagescountel, $completionmessagesel);
+
+        return [$groupname];
+    }
+
+    /**
+     * Returns true if any custom completion rule is enabled.
+     *
+     * @param array $data Form data.
+     * @return bool
+     */
+    public function completion_rule_enabled($data) {
+        $suffix = $this->get_suffix();
+        return !empty($data['completionmessages' . $suffix]);
+    }
+
+    /**
+     * Pre-process form data to load the completionmessages count into the group field.
+     */
     public function data_preprocessing(&$default_values) {
         parent::data_preprocessing($default_values);
+
+        $suffix = $this->get_suffix();
+
+        // Map the stored completionmessages integer into the count sub-field.
+        if (isset($default_values['completionmessages']) && $default_values['completionmessages'] > 0) {
+            $default_values['completionmessages' . $suffix]      = 1;
+            $default_values['completionmessagescount' . $suffix] = $default_values['completionmessages'];
+        } else {
+            $default_values['completionmessages' . $suffix]      = 0;
+            $default_values['completionmessagescount' . $suffix] = 5;
+        }
+        
+        // Prepare system prompt editor.
+        $default_values['systemprompt_editor'] = [
+            'text'   => $default_values['systemprompt'] ?? get_string('defaultprompt', 'moochat'),
+            'format' => FORMAT_HTML,
+        ];
 
         // Prepare file manager for avatar.
         if ($this->current->instance) {
@@ -202,8 +280,28 @@ class mod_moochat_mod_form extends moodleform_mod {
         }
     }
 
+    /**
+     * Post-process submitted form data.
+     *
+     * Collapses the completionmessages group fields into a single integer
+     * stored in $data->completionmessages (0 = disabled, N = threshold).
+     */
     public function data_postprocessing($data) {
         parent::data_postprocessing($data);
+
+        $suffix = $this->get_suffix();
+        $enabled = !empty($data->{'completionmessages' . $suffix});
+        $count   = isset($data->{'completionmessagescount' . $suffix})
+            ? (int) $data->{'completionmessagescount' . $suffix}
+            : 5;
+
+        // Store 0 when disabled, otherwise store the count (minimum 1).
+        $data->completionmessages = $enabled ? max(1, $count) : 0;
+        
+        // Save system prompt — strip HTML tags before storing so the AI gets clean text.
+        if (isset($data->systemprompt_editor['text'])) {
+            $data->systemprompt = strip_tags($data->systemprompt_editor['text']);
+        }
 
         // Handle avatar file upload.
         if (!empty($data->avatar)) {

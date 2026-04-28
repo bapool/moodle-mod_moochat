@@ -40,6 +40,9 @@ function moochat_add_instance($moochat) {
     if (!isset($moochat->content_restrict)) {
         $moochat->content_restrict = 0;
     }
+    if (!isset($moochat->completionmessages)) {
+        $moochat->completionmessages = 0;
+    }
     $moochat->id = $DB->insert_record('moochat', $moochat);
     moochat_grade_item_update($moochat);
     return $moochat->id;
@@ -60,6 +63,9 @@ function moochat_update_instance($moochat) {
     }
     if (!isset($moochat->content_restrict)) {
         $moochat->content_restrict = 0;
+    }
+    if (!isset($moochat->completionmessages)) {
+        $moochat->completionmessages = 0;
     }
     $result = $DB->update_record('moochat', $moochat);
     if ($moochat->grade == 0) {
@@ -141,6 +147,7 @@ function moochat_supports($feature) {
         case FEATURE_GROUPINGS:               return true;
         case FEATURE_GROUPS:                  return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS: return true;
+        case FEATURE_COMPLETION_HAS_RULES:    return true;
         default:                              return null;
     }
 }
@@ -375,6 +382,12 @@ function moochat_get_coursemodule_info($coursemodule) {
     $moochat    = $DB->get_record('moochat', ['id' => $coursemodule->instance], '*', MUST_EXIST);
     $info       = new cached_cm_info();
     $info->name = $moochat->name;
+
+    // Store custom completion rule data so get_custom_rule_descriptions() can read it.
+    if ($coursemodule->completion == COMPLETION_TRACKING_AUTOMATIC) {
+        $info->customdata['customcompletionrules']['completionmessages'] = $moochat->completionmessages;
+    }
+
     if ($moochat->display == 1) {
         $context   = context_module::instance($coursemodule->id);
         $avatarurl = null;

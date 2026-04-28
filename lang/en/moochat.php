@@ -120,6 +120,12 @@ $string['maxmessages_help']    = 'Limit how many messages a student can send in 
 $string['temperature']         = 'Creativity Level';
 $string['temperature_help']    = 'Lower values make responses more focused. Higher values make responses more creative.';
 
+// ---- Completion ----
+$string['completionmessages']       = 'Require interactions';
+$string['completionmessages_help']  = 'When enabled, the student must send at least the specified number of messages to the AI before the activity is marked complete. Set to 0 to disable.';
+$string['completionmessages_label'] = 'messages sent to the AI';
+$string['completionmessages_desc']  = 'Send at least {$a} message(s) to the AI';
+
 // ---- Chat interface ----
 $string['startchat']          = 'Start chatting with the AI assistant!';
 $string['startchatwith']      = 'Start chatting with {$a}!';
